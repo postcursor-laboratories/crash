@@ -5,7 +5,7 @@ bin/*.class
 *.out
 *.elf
 *.app
-*.jar
+out/*.jar
 
 # Eclipse files
 .classpath
