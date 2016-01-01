@@ -1,0 +1,14 @@
+bin/*.class
+
+# Executables
+*.exe
+*.out
+*.elf
+*.app
+*.jar
+
+# Eclipse files
+.classpath
+.project
+.metadata/
+.settings/
