@@ -1,9 +1,12 @@
+import java.awt.event.KeyEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.World;
 
 public class Player {
 	Body b;
@@ -17,11 +20,19 @@ public class Player {
 		cliOut = out;
 		cliIn = in;
 	}
+	
+	void act(World world){
+		if(keys[KeyEvent.VK_A]){
+			System.out.println("FOO");
+			b.applyForce(new Vec2(1000,0), b.getLocalCenter());
+		}
+	}
 
 	void sendKeys() throws IOException{
 		//First send all the keys currently down, followed by -1 (to indicate end of list)
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
+				System.out.println("Down "+i);
 				cliOut.writeInt(i);
 			}
 		}

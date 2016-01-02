@@ -158,6 +158,11 @@ public class GameWorld {
 		}
 	}
 	
+	void sendInit(DataOutputStream cli, Player player) throws IOException{
+		sendWorld(cli);
+		cli.writeInt(bodyIds.get(player.b));
+	}
+	
 	void sendWorld(DataOutputStream cli) throws IOException{
 		cli.writeInt(1337); //Start of packet; used as a signal of data availability, too.
 		
@@ -207,6 +212,11 @@ public class GameWorld {
 	void writeVec(DataOutputStream cli, Vec2 p) throws IOException{
 		cli.writeFloat(p.x);
 		cli.writeFloat(p.y);
+	}
+
+	void readInit(DataInputStream cliIn, Player player) throws IOException {
+		readWorld(cliIn);
+		player.b = bodies.get(cliIn.readInt());
 	}
 	
 	void readWorld(DataInputStream cli) throws IOException{
@@ -369,10 +379,10 @@ public class GameWorld {
 		BodyDef playerDef = new BodyDef();
 		playerDef.type = BodyType.DYNAMIC;
 		playerDef.position = new Vec2(0, 5f);
-		player.b = w.createBody(playerDef);
+		player.b = _world.createBody(playerDef);
 		
 		PolygonShape playerShape = new PolygonShape();
-		playerShape.setAsBox(0.7f, 3.5f);
+		playerShape.setAsBox(0.7f, 1.5f);
 		player.b.createFixture(playerShape, 0.1f);
 		player.b.m_fixtureList.m_friction = 1f;
 		

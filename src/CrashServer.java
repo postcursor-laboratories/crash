@@ -66,12 +66,14 @@ public class CrashServer {
 		world.init();
 		
 		world.createPlayer(player);
-//		try {
-//			world.sendWorld(player.cliOut);
-//		} catch (IOException e1) {
-//			throw new RuntimeException(e1);
-//		}
-//		
+		try {
+			world.sendInit(player.cliOut, player);
+		} catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
+		
+		world.tick();
+		
 		try {
 			_leaderboard = new Leaderboard("./leaderboard.txt", 10);
 		} catch (IOException e2) {
@@ -97,6 +99,7 @@ public class CrashServer {
 				} catch (InterruptedException e) {
 				}
 				world.tick();
+				player.act(world._world);
 			}
 		}
 	}

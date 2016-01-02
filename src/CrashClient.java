@@ -48,6 +48,7 @@ public class CrashClient {
 			}
 
 			public void keyPressed(KeyEvent e) {
+				System.out.println(e.getKeyChar());
 				player.keys[e.getKeyCode()] = true;
 				player.strokes.add(e.getKeyCode());
 			}
@@ -62,7 +63,7 @@ public class CrashClient {
 
 		world = new GameWorld();
 		try {
-			world.readWorld(player.cliIn);
+			world.readInit(player.cliIn, player);
 		} catch (IOException e1) {
 			throw new RuntimeException(e1);
 		}
@@ -85,6 +86,7 @@ public class CrashClient {
 			BufferStrategy buff = can.getBufferStrategy();
 			while (true) {
 				world.tick();
+				player.act(world._world);
 				
 				Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 				world.draw(g, W, H);
