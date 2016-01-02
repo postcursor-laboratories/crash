@@ -21,7 +21,7 @@ public class Resources {
 		try {
 			InputStream is = CrashServer.class.getClassLoader().getResourceAsStream(
 					"ScoreFont.ttf");
-			font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(50f);
+			font = Font.createFont(Font.TRUETYPE_FONT, is);
 			System.out.println(font);
 			is.close();
 		} catch (IOException | FontFormatException ex) {
@@ -39,5 +39,9 @@ public class Resources {
 			g.setColor(MAROON);
 			g.fillRect(0, 0, W, H);
 		}
+	}
+	
+	public static Font getFont(float size) {
+		return font.deriveFont(size);
 	}
 }

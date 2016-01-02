@@ -67,8 +67,9 @@ public class Menu {
 			g.setColor(Color.BLACK);
 			
 			// TODO make this actually pretty
-			//g.setFont(Resources.font);
+			g.setFont(Resources.getFont(100));
 			g.drawString("CRASH", 100, 100);
+			g.setFont(Resources.getFont(50));
 			
 			MenuEntry[] entries = _menuHistory.peek();
 			if (entries != null) {
