@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
-import java.util.ArrayList;
 import java.util.Stack;
 import java.util.function.Supplier;
 
@@ -13,7 +12,6 @@ public class Menu {
 	// so that we can navigate between different screens
 	private Stack<MenuEntry[]> _menuHistory;
 	private int _selectionIndex = 0; // index into _currentEntries of currently highlighted menu item
-	private Settings _settings;
 	
 	private MenuEntry[] _entries = {
 			new MenuEntry("start game!", () -> {
@@ -23,12 +21,11 @@ public class Menu {
 			}),
 			
 			new MenuEntry("settings", () -> {
-				_settings = new Settings();
 				_menuHistory.push(new MenuEntry[]{
-					new MenuEntry(() -> "player name: "+_settings._playerName, () -> {
+					new MenuEntry(() -> "player name: "+Settings._playerName, () -> {
 						//_settings._playerName = "foobar"; // TODO somehow get new name
 					}),
-					new MenuEntry(() -> "server IP: "+_settings._serverIP, () -> {
+					new MenuEntry(() -> "server IP: "+Settings._serverIP, () -> {
 						//_settings._serverIP = "foo.bar"; // TODO somehow get new server IP
 					}),
 					new MenuEntry("setting 3", () -> System.out.println("setting tres!")),
@@ -36,7 +33,7 @@ public class Menu {
 					new MenuEntry("back", () -> {
 						_menuHistory.pop();
 						_selectionIndex = 0;
-						_settings.save();
+						Settings.save();
 					}),
 				});
 				_selectionIndex = 0;

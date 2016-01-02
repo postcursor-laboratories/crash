@@ -5,14 +5,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Settings {
-	String _playerName = "default";
-	String _serverIP = "184.187.175.50";
+	static String _playerName = "default";
+	static String _serverIP = "184.187.175.50";
 	
-	public Settings() {
+	static {
 		load();
 	}
 	
-	public void save() {
+	public static void save() {
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(AppDataManager.getAppDataFile("settings")));
 			out.writeUTF(_playerName);
@@ -24,7 +24,7 @@ public class Settings {
 		}
 	}
 	
-	public void load() {
+	public static void load() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(AppDataManager.getAppDataFile("settings")));
 			_playerName = in.readUTF();
