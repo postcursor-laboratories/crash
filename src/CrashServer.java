@@ -17,10 +17,7 @@ public class CrashServer {
 	JFrame jf;
 	Canvas can;
 	
-	ServerSocket ss;
-	Socket cli;
-	
-	Player player;
+	ArrayList<Player> players = new ArrayList<>();
 
 	static final int W = Resources.W, H = Resources.H;
 	
@@ -35,22 +32,37 @@ public class CrashServer {
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		try {
-			ss=new ServerSocket(42973);
-			cli=ss.accept();
-			
-			DataOutputStream cliOut=new DataOutputStream(cli.getOutputStream());
-			DataInputStream cliIn=new DataInputStream(cli.getInputStream());
-			player = new Player(cliOut, cliIn);
-			
-		} catch (IOException e2) {
-			e2.printStackTrace();
-			return;
-		}
+		world = new GameWorld();
+		world.init();
+
+		new Thread("ServerAcceptThread") { public void run() {
+			ServerSocket ss;
+			try {
+				ss = new ServerSocket(42973);
+			} catch (IOException e2) {
+				e2.printStackTrace();
+				return;
+			}
+			while (true) {
+				try {
+					Socket cli = ss.accept();
+
+					DataOutputStream cliOut = new DataOutputStream(cli.getOutputStream());
+					DataInputStream cliIn = new DataInputStream(cli.getInputStream());
+					Player player = new Player(cliOut, cliIn);
+					world.sendInit(player.cliOut, player);
+
+					players.add(player);
+					world.createPlayer(player);
+
+				} catch (IOException e2) {
+					e2.printStackTrace();
+				}
+			}
+		}}.start();
 
 		can.addKeyListener(new KeyListener() {
-			public void keyTyped(KeyEvent e) {
-			}
+			public void keyTyped(KeyEvent e) { }
 			public void keyPressed(KeyEvent e) {
 				keys[e.getKeyCode()] = true;
 			}
@@ -62,46 +74,28 @@ public class CrashServer {
 		can.setFocusable(true);
 		can.requestFocus();
 		
-		world = new GameWorld();
-		world.init();
-		
-		world.createPlayer(player);
-		try {
-			world.sendInit(player.cliOut, player);
-		} catch (IOException e1) {
-			throw new RuntimeException(e1);
-		}
-		
-		world.tick();
-		
 		try {
 			_leaderboard = new Leaderboard("./leaderboard.txt", 10);
 		} catch (IOException e2) {
 			throw new RuntimeException("Couldn't open leaderboard!");
 		}
 		
-		while(true){
+		bigLoop: while(true){
 			can.createBufferStrategy(2);
 			BufferStrategy buff = can.getBufferStrategy();
-			while (true) {
-				Graphics2D g = (Graphics2D) buff.getDrawGraphics();
-				world.draw(g, W, H);
-				buff.show();
-				
+			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			world.draw(g, W, H);
+			buff.show();
+			
+			for (Player player : players) {
+				player.act(world._world);
 				try {
 					world.sendWorld(player.cliOut);
 				} catch (IOException e1) {
 					throw new RuntimeException(e1);
 				}
-				
-				try {
-					Thread.sleep(30);
-				} catch (InterruptedException e) {
-				}
-				world.tick();
-				player.act(world._world);
 			}
-		}
+			world.tick();
 	}
 
 //	public static void main(String[] args) {
