@@ -119,7 +119,6 @@ public class CrashServer {
 						actTime += System.currentTimeMillis();
 						
 					} catch (IOException e1) {
-						player.markDead(world);
 						playersToRemove.add(player);
 //						throw new RuntimeException(e1);
 						sendTime += System.currentTimeMillis();
@@ -128,9 +127,13 @@ public class CrashServer {
 				players.removeAll(playersToRemove);
 				
 				world.tick();
+
+				for (Player player : playersToRemove) {
+					player.markDead(world);
+				}
 				totalTime += System.currentTimeMillis();
 				
-//				System.out.println(sendTime+", "+actTime+", "+(totalTime-sendTime-actTime));
+				//System.out.println(sendTime+", "+actTime+", "+(totalTime-sendTime-actTime));
 			}
 			
 			try {
