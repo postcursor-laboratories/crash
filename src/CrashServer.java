@@ -119,6 +119,7 @@ public class CrashServer {
 						actTime += System.currentTimeMillis();
 						
 					} catch (IOException e1) {
+						player.markDead(world);
 						playersToRemove.add(player);
 //						throw new RuntimeException(e1);
 						sendTime += System.currentTimeMillis();
