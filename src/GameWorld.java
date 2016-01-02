@@ -1,8 +1,6 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
@@ -11,10 +9,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import javax.swing.JFrame;
 
 import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -27,9 +21,6 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.contacts.ContactEdge;
-import org.jbox2d.dynamics.joints.RevoluteJoint;
-import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
 
 public class GameWorld {
 
@@ -372,5 +363,19 @@ public class GameWorld {
 				fix1.getShape().m_radius, fix2.getBody().getTransform(),
 				fix2.getShape().m_radius);
 		return wm;
+	}
+
+	void createPlayer(Player player) {
+		BodyDef playerDef = new BodyDef();
+		playerDef.type = BodyType.DYNAMIC;
+		playerDef.position = new Vec2(0, 5f);
+		player.b = w.createBody(playerDef);
+		
+		PolygonShape playerShape = new PolygonShape();
+		playerShape.setAsBox(0.7f, 3.5f);
+		player.b.createFixture(playerShape, 0.1f);
+		player.b.m_fixtureList.m_friction = 1f;
+		
+		addBody(player.b);
 	}
 }

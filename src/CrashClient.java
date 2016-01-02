@@ -1,37 +1,14 @@
 import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-
-import org.jbox2d.collision.WorldManifold;
-import org.jbox2d.collision.shapes.CircleShape;
-import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.contacts.Contact;
-import org.jbox2d.dynamics.contacts.ContactEdge;
-import org.jbox2d.dynamics.joints.RevoluteJoint;
-import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
 public class CrashClient {
 	GameWorld world;
@@ -42,8 +19,6 @@ public class CrashClient {
 	Player player;
 
 	static final int W = Resources.W, H = Resources.H;
-
-	boolean[] keys = new boolean[1 << 16];
 	
 	long lostTime;
 
@@ -73,13 +48,15 @@ public class CrashClient {
 			}
 
 			public void keyPressed(KeyEvent e) {
-				keys[e.getKeyCode()] = true;
+				player.keys[e.getKeyCode()] = true;
+				player.strokes.add(e.getKeyCode());
 			}
 
 			public void keyReleased(KeyEvent e) {
-				keys[e.getKeyCode()] = false;
+				player.keys[e.getKeyCode()] = false;
 			}
 		});
+		
 		can.setFocusable(true);
 		can.requestFocus();
 
@@ -103,7 +80,6 @@ public class CrashClient {
 			}
 		}.start();
 		
-		bigLoop:
 		while(true){
 			can.createBufferStrategy(2);
 			BufferStrategy buff = can.getBufferStrategy();
