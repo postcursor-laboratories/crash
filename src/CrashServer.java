@@ -130,7 +130,7 @@ public class CrashServer {
 				world.tick();
 				totalTime += System.currentTimeMillis();
 				
-				System.out.println(sendTime+", "+actTime+", "+(totalTime-sendTime-actTime));
+//				System.out.println(sendTime+", "+actTime+", "+(totalTime-sendTime-actTime));
 			}
 			
 			try {
