@@ -35,7 +35,7 @@ public class CrashClient {
 		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
 
 		try {
-			serv=new Socket("localhost",42973);
+			serv=new Socket("184.187.175.50",42973);
 			player = new Player(
 					new DataOutputStream(serv.getOutputStream()),
 					new DataInputStream(serv.getInputStream())
@@ -105,22 +105,16 @@ public class CrashClient {
 	}
 
 	public static void main(String[] args) {
-//		if(args.length > 0){
-//			new Thread("Server"){public void run(){
-//				new CrashServer();
-//			}}.start();
-//			try{
-//				Thread.sleep(1000);
-//			}catch(Exception e){}
-//		}
-		new Thread("Client1"){public void run(){
+		if(args.length > 0){
+			new Thread("Server"){public void run(){
+				new CrashServer();
+			}}.start();
+			try{
+				Thread.sleep(100);
+			}catch(Exception e){}
+		}
+		new Thread("Client"){public void run(){
 			new CrashClient();
 		}}.start();
-//		try{
-//			Thread.sleep(2000);
-//		}catch(Exception e){}
-//		new Thread("Client2"){public void run(){
-//			new CrashClient();
-//		}}.start();
 	}
 }

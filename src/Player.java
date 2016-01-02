@@ -43,18 +43,18 @@ public class Player {
 		}
 		cliOut.writeInt(-1);
 		
-		synchronized(strokes){
-			//Next send all of the keystrokes received
-			cliOut.writeInt(strokes.size());
-			for(Integer i : strokes)
-				cliOut.writeInt(i);
-	
-			strokes.clear();
-		}
+//		synchronized(strokes){
+//			//Next send all of the keystrokes received
+//			cliOut.writeInt(strokes.size());
+//			for(Integer i : strokes)
+//				cliOut.writeInt(i);
+//	
+//			strokes.clear();
+//		}
 	}
 	
 	void recvKeys() throws IOException{
-		while(cliIn.available() > 0){
+		while(cliIn.available() >= 4){
 			int loc=0;
 			int nextDown;
 			while( (nextDown = cliIn.readInt()) != -1){
@@ -66,12 +66,12 @@ public class Player {
 			while(loc<(1<<16))
 				keys[loc++]=false;
 			
-			strokes.clear();
-			
-			int numStrokes = cliIn.readInt();
-			for(int i=0; i<numStrokes; i++){
-				strokes.add(cliIn.readInt());
-			}
+//			strokes.clear();
+//			
+//			int numStrokes = cliIn.readInt();
+//			for(int i=0; i<numStrokes; i++){
+//				strokes.add(cliIn.readInt());
+//			}
 		}
 	}
 }

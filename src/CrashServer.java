@@ -89,34 +89,52 @@ public class CrashServer {
 		can.createBufferStrategy(2);
 		BufferStrategy buff = can.getBufferStrategy();
 		while(true){
-			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
-			world.draw(g, W, H);
-			buff.show();
+//			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+//			world.draw(g, W, H);
+//			buff.show();
+			
+			long sendTime = 0;
+			long actTime = 0;
+			long totalTime = 0;
 			
 			synchronized(players){
+				
+				totalTime -= System.currentTimeMillis();
 				ArrayList<Player> playersToRemove = new ArrayList<>();
 				
 				for (Player player : players) {
 					try {
+						
+						sendTime -= System.currentTimeMillis();
 						if(!player.initialized){
 							world.sendInit(player.cliOut, player);
 						} else {
 							world.sendWorld(player.cliOut);
 						}
+						sendTime += System.currentTimeMillis();
+						
+						actTime -= System.currentTimeMillis();
 						player.recvKeys();
 						player.act(world._world);
+						actTime += System.currentTimeMillis();
+						
 					} catch (IOException e1) {
 						playersToRemove.add(player);
 //						throw new RuntimeException(e1);
+						sendTime += System.currentTimeMillis();
 					}
 				}
 				players.removeAll(playersToRemove);
 				
 				world.tick();
+				totalTime += System.currentTimeMillis();
+				
+				System.out.println(sendTime+", "+actTime+", "+(totalTime-sendTime-actTime));
 			}
 			
 			try {
-				Thread.sleep(30);
+				if(totalTime <= 29)
+					Thread.sleep(30 - totalTime);
 			} catch (InterruptedException e1) {}
 		}
 	}

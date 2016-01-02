@@ -128,8 +128,13 @@ public class GameWorld {
 		addBody(box);
 	}
 	
+	//For server
 	void addBody(Body b){
-		int bodyId = nextBodyId++;
+		addBody(nextBodyId++, b);
+	}
+	
+	//For client, receiving a given ID
+	void addBody(int bodyId, Body b){
 		bodyIds.put(b, bodyId);
 		bodies.put(bodyId, b);
 		newBodies.add(b);
@@ -168,6 +173,7 @@ public class GameWorld {
 		cli.writeInt(bodies.size());
 		for(Body b : bodies.values()){
 			//New body information; what type?
+			cli.writeInt(bodyIds.get(b));
 			writeNewBody(cli, b);
 		}
 		cli.writeInt(bodyIds.get(player.b));
@@ -180,6 +186,7 @@ public class GameWorld {
 		cli.writeInt(newBodies.size());
 		for(Body b : newBodies){
 			//New body information; what type?
+			cli.writeInt(bodyIds.get(b));
 			writeNewBody(cli, b);
 		}
 		
@@ -229,8 +236,7 @@ public class GameWorld {
 		synchronized(_world){
 			int newBodyCount = cli.readInt();
 			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
-				addBody(readNewBody(cli));
-				System.out.println("Added body init! "+nextBodyId+" next");
+				addBody(cli.readInt(), readNewBody(cli));
 			}
 		}
 		player.b = bodies.get(cli.readInt());
@@ -244,8 +250,7 @@ public class GameWorld {
 		synchronized(_world){
 			int newBodyCount = cli.readInt();
 			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
-				addBody(readNewBody(cli));
-				System.out.println("Added body live! "+nextBodyId+" next");
+				addBody(cli.readInt(), readNewBody(cli));
 			}
 			
 			int goneBodyCount = cli.readInt();
