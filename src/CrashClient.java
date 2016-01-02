@@ -51,7 +51,7 @@ public class CrashClient {
 			}
 
 			public void keyPressed(KeyEvent e) {
-				System.out.println(e.getKeyChar());
+				//System.out.println(e.getKeyChar());
 				player.keys[e.getKeyCode()] = true;
 				synchronized(player.strokes){
 					player.strokes.add(e.getKeyCode());
