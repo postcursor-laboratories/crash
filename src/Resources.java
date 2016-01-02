@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 
 
 public class Resources {
-	static final int W = 1920, H = 1050;
+	static int
+		W = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth(),
+		H = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight()  - 50;
 	static final Color MAROON = new Color(120, 0, 160);
 
 	static Font font;
