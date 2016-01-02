@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -40,10 +41,7 @@ public class CrashServer {
 	JFrame jf;
 	Canvas can;
 	
-	ServerSocket ss;
-	Socket cli;
-	
-	Player player;
+	ArrayList<Player> players = new ArrayList<>();
 
 	static final int W = Resources.W, H = Resources.H;
 	
@@ -58,22 +56,36 @@ public class CrashServer {
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		try {
-			ss=new ServerSocket(42973);
-			cli=ss.accept();
-			
-			DataOutputStream cliOut=new DataOutputStream(cli.getOutputStream());
-			DataInputStream cliIn=new DataInputStream(cli.getInputStream());
-			player = new Player(cliOut, cliIn);
-			
-		} catch (IOException e2) {
-			e2.printStackTrace();
-			return;
-		}
+		world = new GameWorld();
+		world.init();
+
+		new Thread("ServerAcceptThread") { public void run() {
+			ServerSocket ss;
+			try {
+				ss = new ServerSocket(42973);
+			} catch (IOException e2) {
+				e2.printStackTrace();
+				return;
+			}
+			while (true) {
+				try {
+					Socket cli = ss.accept();
+
+					DataOutputStream cliOut = new DataOutputStream(cli.getOutputStream());
+					DataInputStream cliIn = new DataInputStream(cli.getInputStream());
+					Player player = new Player(cliOut, cliIn);
+					world.sendWorld(player.cliOut);
+
+					players.add(player);
+
+				} catch (IOException e2) {
+					e2.printStackTrace();
+				}
+			}
+		}}.start();
 
 		can.addKeyListener(new KeyListener() {
-			public void keyTyped(KeyEvent e) {
-			}
+			public void keyTyped(KeyEvent e) { }
 			public void keyPressed(KeyEvent e) {
 				keys[e.getKeyCode()] = true;
 			}
@@ -85,14 +97,6 @@ public class CrashServer {
 		can.setFocusable(true);
 		can.requestFocus();
 		
-		world = new GameWorld();
-		world.init();
-		try {
-			world.sendWorld(player.cliOut);
-		} catch (IOException e1) {
-			throw new RuntimeException(e1);
-		}
-		
 		try {
 			_leaderboard = new Leaderboard("./leaderboard.txt", 10);
 		} catch (IOException e2) {
@@ -100,26 +104,25 @@ public class CrashServer {
 		}
 		
 		bigLoop: while(true){
-				can.createBufferStrategy(2);
-				BufferStrategy buff = can.getBufferStrategy();
-				while (true) {
-					Graphics2D g = (Graphics2D) buff.getDrawGraphics();
-					world.draw(g, W, H);
-					buff.show();
-					
-					world.tick();
-					try {
-						world.sendWorld(player.cliOut);
-					} catch (IOException e1) {
-						throw new RuntimeException(e1);
-					}
-					
-					try {
-						Thread.sleep(30);
-					} catch (InterruptedException e) {
-					}
+			can.createBufferStrategy(2);
+			BufferStrategy buff = can.getBufferStrategy();
+			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			world.draw(g, W, H);
+			buff.show();
+			
+			world.tick();
+			for (Player player : players) {
+				try {
+					world.sendWorld(player.cliOut);
+				} catch (IOException e1) {
+					throw new RuntimeException(e1);
 				}
 			}
+			
+			try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) { }
+		}
 	}
 
 //	public static void main(String[] args) {

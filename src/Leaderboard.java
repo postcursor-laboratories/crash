@@ -6,10 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Leaderboard {
-	private final LinkedList<Pair<String, Integer>> _scores = new LinkedList<Pair<String, Integer>>();
+	private final ArrayList<Pair<String, Integer>> _scores = new ArrayList<Pair<String, Integer>>();
 	private final int NUM_ENTRIES;
 	private File _saveFile;
 	
@@ -43,7 +44,7 @@ public class Leaderboard {
 	}
 	
 	private void sort() {
-		_scores.sort(new Comparator<Pair<String,Integer>>(){
+		Collections.sort(_scores, new Comparator<Pair<String,Integer>>(){
 			public int compare(Pair<String,Integer> o1, Pair<String,Integer> o2) {
 				return o1.tail-o2.tail;
 			}
@@ -63,13 +64,13 @@ public class Leaderboard {
 		if (_scores.size() < NUM_ENTRIES) {
 			_scores.add(new Pair<String,Integer>(name,score));
 			sort();
-		} else if (_scores.getFirst().tail < score){
-			_scores.getFirst().head = name;
-			_scores.getFirst().tail = score;
+		} else if (_scores.get(0).tail < score){
+			_scores.get(0).head = name;
+			_scores.get(0).tail = score;
 		}
 	}
 	
-	public LinkedList<Pair<String,Integer>> getScoreList() {
-		return new LinkedList<Pair<String,Integer>>(_scores);
+	public ArrayList<Pair<String,Integer>> getScoreList() {
+		return new ArrayList<Pair<String,Integer>>(_scores);
 	}
 }

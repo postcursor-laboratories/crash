@@ -127,6 +127,9 @@ public class CrashClient {
 			new Thread("Server"){public void run(){
 				new CrashServer();
 			}}.start();
+			try{
+				Thread.sleep(1000);
+			}catch(Exception e){}
 		}
 		new CrashClient();
 	}
