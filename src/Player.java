@@ -74,4 +74,9 @@ public class Player {
 			}
 		}
 	}
+
+	void markDead(GameWorld world) {
+		world.deadBodies.add(b);
+		world.newDeadBodies.add(b);
+	}
 }

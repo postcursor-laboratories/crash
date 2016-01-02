@@ -106,6 +106,7 @@ public class CrashServer {
 						player.recvKeys();
 						player.act(world._world);
 					} catch (IOException e1) {
+						player.markDead(world);
 						playersToRemove.add(player);
 //						throw new RuntimeException(e1);
 					}

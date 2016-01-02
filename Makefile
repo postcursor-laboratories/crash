@@ -13,7 +13,7 @@ run:
 	$(JAVA) -cp $(CLASSPATH) CrashClient
 
 runserver:
-	$(JAVA) -cp $(CLASSPATH) CrashClient server
+	$(JAVA) -cp $(CLASSPATH) CrashServer
 
 clean:
 	rm -rf bin

@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -32,19 +33,23 @@ public class GameWorld {
 	
 	HashMap<Body,Integer> bodyIds;
 	HashMap<Integer,Body> bodies;
+	HashSet<Body> deadBodies;
 	int nextBodyId;
 	
 	ArrayList<Body> goneBodies;
 	ArrayList<Body> newBodies;
+	ArrayList<Body> newDeadBodies;
 	
 	World _world;
 
 	public GameWorld(){
 		bodyIds = new HashMap<>();
 		bodies = new HashMap<>();
+		deadBodies = new HashSet<>();
 		nextBodyId = 100;
 		goneBodies = new ArrayList<>();
 		newBodies = new ArrayList<>();
+		newDeadBodies = new ArrayList<>();
 		
 		_world = new World(new Vec2(0, GRAV), false);
 	}
@@ -150,6 +155,7 @@ public class GameWorld {
 		}
 		newBodies.clear();
 		goneBodies.clear();
+		newDeadBodies.clear();
 		
 		//Execution
 		bodies.get(100).m_angularVelocity +=
@@ -170,6 +176,10 @@ public class GameWorld {
 			//New body information; what type?
 			writeNewBody(cli, b);
 		}
+		cli.writeInt(deadBodies.size());
+		for (Body b : deadBodies) {
+			cli.writeInt(bodyIds.get(b));
+		}
 		cli.writeInt(bodyIds.get(player.b));
 		player.initialized = true;
 	}
@@ -185,6 +195,11 @@ public class GameWorld {
 		
 		cli.writeInt(goneBodies.size());
 		for(Body b : goneBodies){
+			cli.writeInt(bodyIds.get(b));
+		}
+
+		cli.writeInt(newDeadBodies.size());
+		for(Body b : newDeadBodies){
 			cli.writeInt(bodyIds.get(b));
 		}
 		
@@ -228,9 +243,13 @@ public class GameWorld {
 	void readInit(DataInputStream cli, Player player) throws IOException {
 		synchronized(_world){
 			int newBodyCount = cli.readInt();
-			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
+			for(int i = 0; i < newBodyCount; i++){
 				addBody(readNewBody(cli));
 				System.out.println("Added body init! "+nextBodyId+" next");
+			}
+			int deadBodyCount = cli.readInt();
+			for (int i = 0; i < deadBodyCount; i++) {
+				deadBodies.add(bodies.get(cli.readInt()));
 			}
 		}
 		player.b = bodies.get(cli.readInt());
@@ -251,6 +270,11 @@ public class GameWorld {
 			int goneBodyCount = cli.readInt();
 			for(int goneBodyI = 0; goneBodyI < goneBodyCount; goneBodyI++){
 				removeBody(bodies.get(cli.readInt()));
+			}
+
+			int newDeadBodyCount = cli.readInt();
+			for(int newDeadBodyI = 0; newDeadBodyI < newDeadBodyCount; newDeadBodyI++){
+				deadBodies.add(bodies.get(cli.readInt()));
 			}
 			
 			for(int modBodyI = 0; modBodyI < bodies.size(); modBodyI++){
@@ -318,9 +342,7 @@ public class GameWorld {
 		
 		synchronized(_world){
 			for(Body b : bodies.values()){
-				g.translate(
-					b.getPosition().x, b.getPosition().y
-						);
+				g.translate(b.getPosition().x, b.getPosition().y);
 				g.rotate(b.getAngle());
 				for(Fixture f = b.getFixtureList(); f != null; f = f.getNext()){
 					Shape drawShape;
@@ -348,6 +370,12 @@ public class GameWorld {
 						drawShape = null;
 					}
 					
+					if (deadBodies.contains(b)) {
+						g.setColor(Color.RED);
+					} else {
+						g.setColor(Color.BLACK);
+					}
+
 					g.fill(drawShape);
 				}
 				g.setTransform(trans);
