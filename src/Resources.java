@@ -11,7 +11,7 @@ import javax.imageio.ImageIO;
 
 
 public class Resources {
-	static final int W = 1000, H = 800;
+	static final int W = 1920, H = 1050;
 	static final Color MAROON = new Color(120, 0, 160);
 
 	static Font font;

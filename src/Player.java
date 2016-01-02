@@ -43,12 +43,14 @@ public class Player {
 		}
 		cliOut.writeInt(-1);
 		
-		//Next send all of the keystrokes received
-		cliOut.writeInt(strokes.size());
-		for(Integer i : strokes)
-			cliOut.writeInt(i);
+		synchronized(strokes){
+			//Next send all of the keystrokes received
+			cliOut.writeInt(strokes.size());
+			for(Integer i : strokes)
+				cliOut.writeInt(i);
 	
-		strokes.clear();
+			strokes.clear();
+		}
 	}
 	
 	void recvKeys() throws IOException{

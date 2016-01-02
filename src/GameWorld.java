@@ -94,6 +94,10 @@ public class GameWorld {
 			addBody(player);
 		}
 
+		addWall(-30, 0, 0.1f, 16f, 0.5f);
+		addWall(30, 0, 0.1f, 16f, 0.5f);
+		addWall(0, -15.9f, 30f, 0.1f, 0.5f);
+		addWall(0, 15.9f, 30f, 0.1f, 0.5f);
 	}
 	
 	void addWall(float x, float y, float w, float h, float friction) {
@@ -150,10 +154,10 @@ public class GameWorld {
 		//Execution
 		bodies.get(100).m_angularVelocity +=
 				+ (float)((Math.random()-0.49)/50);
-		bodies.get(100).m_angularVelocity *= 0.9;
+		bodies.get(100).m_angularVelocity *= 0.99;
 		bodies.get(101).m_angularVelocity +=
 				+ (float)((Math.random()-0.51)/50);
-		bodies.get(101).m_angularVelocity *= 0.9;
+		bodies.get(101).m_angularVelocity *= 0.99;
 		
 		synchronized(_world){
 			_world.step(0.03f, 6, 3);

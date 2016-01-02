@@ -1,4 +1,5 @@
 import java.awt.Canvas;
+import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -32,6 +33,7 @@ public class CrashServer {
 		jf.setTitle("Server Viewer");
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
 
 		world = new GameWorld();
 		world.init();
@@ -92,6 +94,8 @@ public class CrashServer {
 			buff.show();
 			
 			synchronized(players){
+				ArrayList<Player> playersToRemove = new ArrayList<>();
+				
 				for (Player player : players) {
 					try {
 						if(!player.initialized){
@@ -102,9 +106,12 @@ public class CrashServer {
 						player.recvKeys();
 						player.act(world._world);
 					} catch (IOException e1) {
-						throw new RuntimeException(e1);
+						playersToRemove.add(player);
+//						throw new RuntimeException(e1);
 					}
 				}
+				players.removeAll(playersToRemove);
+				
 				world.tick();
 			}
 			
@@ -114,7 +121,7 @@ public class CrashServer {
 		}
 	}
 
-//	public static void main(String[] args) {
-//		new CrashServer();
-//	}
+	public static void main(String[] args) {
+		new CrashServer();
+	}
 }

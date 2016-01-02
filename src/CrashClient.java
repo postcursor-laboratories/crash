@@ -1,4 +1,5 @@
 import java.awt.Canvas;
+import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -30,7 +31,8 @@ public class CrashClient {
 		jf.setTitle("Client Viewer");
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		jf.setLocation(800, 300);
+//		jf.setLocation(800, 300);
+		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
 
 		try {
 			serv=new Socket("localhost",42973);
@@ -50,7 +52,9 @@ public class CrashClient {
 			public void keyPressed(KeyEvent e) {
 				System.out.println(e.getKeyChar());
 				player.keys[e.getKeyCode()] = true;
-				player.strokes.add(e.getKeyCode());
+				synchronized(player.strokes){
+					player.strokes.add(e.getKeyCode());
+				}
 			}
 
 			public void keyReleased(KeyEvent e) {
@@ -101,22 +105,22 @@ public class CrashClient {
 	}
 
 	public static void main(String[] args) {
-		if(args.length > 0){
-			new Thread("Server"){public void run(){
-				new CrashServer();
-			}}.start();
-			try{
-				Thread.sleep(1000);
-			}catch(Exception e){}
-		}
+//		if(args.length > 0){
+//			new Thread("Server"){public void run(){
+//				new CrashServer();
+//			}}.start();
+//			try{
+//				Thread.sleep(1000);
+//			}catch(Exception e){}
+//		}
 		new Thread("Client1"){public void run(){
 			new CrashClient();
 		}}.start();
-		try{
-			Thread.sleep(2000);
-		}catch(Exception e){}
-		new Thread("Client2"){public void run(){
-			new CrashClient();
-		}}.start();
+//		try{
+//			Thread.sleep(2000);
+//		}catch(Exception e){}
+//		new Thread("Client2"){public void run(){
+//			new CrashClient();
+//		}}.start();
 	}
 }
