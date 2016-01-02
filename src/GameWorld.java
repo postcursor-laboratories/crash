@@ -150,8 +150,10 @@ public class GameWorld {
 		//Execution
 		bodies.get(100).m_angularVelocity +=
 				+ (float)((Math.random()-0.49)/50);
+		bodies.get(100).m_angularVelocity *= 0.9;
 		bodies.get(101).m_angularVelocity +=
 				+ (float)((Math.random()-0.51)/50);
+		bodies.get(101).m_angularVelocity *= 0.9;
 		
 		synchronized(_world){
 			_world.step(0.03f, 6, 3);
@@ -159,8 +161,13 @@ public class GameWorld {
 	}
 	
 	void sendInit(DataOutputStream cli, Player player) throws IOException{
-		sendWorld(cli);
+		cli.writeInt(bodies.size());
+		for(Body b : bodies.values()){
+			//New body information; what type?
+			writeNewBody(cli, b);
+		}
 		cli.writeInt(bodyIds.get(player.b));
+		player.initialized = true;
 	}
 	
 	void sendWorld(DataOutputStream cli) throws IOException{
@@ -214,9 +221,15 @@ public class GameWorld {
 		cli.writeFloat(p.y);
 	}
 
-	void readInit(DataInputStream cliIn, Player player) throws IOException {
-		readWorld(cliIn);
-		player.b = bodies.get(cliIn.readInt());
+	void readInit(DataInputStream cli, Player player) throws IOException {
+		synchronized(_world){
+			int newBodyCount = cli.readInt();
+			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
+				addBody(readNewBody(cli));
+				System.out.println("Added body init! "+nextBodyId+" next");
+			}
+		}
+		player.b = bodies.get(cli.readInt());
 	}
 	
 	void readWorld(DataInputStream cli) throws IOException{
@@ -228,7 +241,7 @@ public class GameWorld {
 			int newBodyCount = cli.readInt();
 			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
 				addBody(readNewBody(cli));
-				System.out.println("Added body! "+nextBodyId+" next");
+				System.out.println("Added body live! "+nextBodyId+" next");
 			}
 			
 			int goneBodyCount = cli.readInt();
@@ -376,16 +389,18 @@ public class GameWorld {
 	}
 
 	void createPlayer(Player player) {
-		BodyDef playerDef = new BodyDef();
-		playerDef.type = BodyType.DYNAMIC;
-		playerDef.position = new Vec2(0, 5f);
-		player.b = _world.createBody(playerDef);
-		
-		PolygonShape playerShape = new PolygonShape();
-		playerShape.setAsBox(0.7f, 1.5f);
-		player.b.createFixture(playerShape, 0.1f);
-		player.b.m_fixtureList.m_friction = 1f;
-		
-		addBody(player.b);
+		synchronized(_world){
+			BodyDef playerDef = new BodyDef();
+			playerDef.type = BodyType.DYNAMIC;
+			playerDef.position = new Vec2(0, 10f);
+			player.b = _world.createBody(playerDef);
+			
+			PolygonShape playerShape = new PolygonShape();
+			playerShape.setAsBox(0.7f, 1.5f);
+			player.b.createFixture(playerShape, 0.1f);
+			player.b.m_fixtureList.m_friction = 1f;
+			
+			addBody(player.b);
+		}
 	}
 }

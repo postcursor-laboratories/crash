@@ -8,6 +8,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -34,6 +35,7 @@ public class CrashServer {
 
 		world = new GameWorld();
 		world.init();
+		world.tick();
 
 		new Thread("ServerAcceptThread") { public void run() {
 			ServerSocket ss;
@@ -49,11 +51,13 @@ public class CrashServer {
 
 					DataOutputStream cliOut = new DataOutputStream(cli.getOutputStream());
 					DataInputStream cliIn = new DataInputStream(cli.getInputStream());
-					Player player = new Player(cliOut, cliIn);
-					world.sendInit(player.cliOut, player);
-
-					players.add(player);
-					world.createPlayer(player);
+					synchronized(players){
+						Player player = new Player(cliOut, cliIn);
+						world.createPlayer(player);
+//						world.sendInit(player.cliOut, player);
+	
+						players.add(player);
+					}
 
 				} catch (IOException e2) {
 					e2.printStackTrace();
@@ -79,23 +83,35 @@ public class CrashServer {
 		} catch (IOException e2) {
 			throw new RuntimeException("Couldn't open leaderboard!");
 		}
-		
-		bigLoop: while(true){
-			can.createBufferStrategy(2);
-			BufferStrategy buff = can.getBufferStrategy();
+
+		can.createBufferStrategy(2);
+		BufferStrategy buff = can.getBufferStrategy();
+		while(true){
 			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 			world.draw(g, W, H);
 			buff.show();
 			
-			for (Player player : players) {
-				player.act(world._world);
-				try {
-					world.sendWorld(player.cliOut);
-				} catch (IOException e1) {
-					throw new RuntimeException(e1);
+			synchronized(players){
+				for (Player player : players) {
+					try {
+						if(!player.initialized){
+							world.sendInit(player.cliOut, player);
+						} else {
+							world.sendWorld(player.cliOut);
+						}
+						player.recvKeys();
+						player.act(world._world);
+					} catch (IOException e1) {
+						throw new RuntimeException(e1);
+					}
 				}
+				world.tick();
 			}
-			world.tick();
+			
+			try {
+				Thread.sleep(30);
+			} catch (InterruptedException e1) {}
+		}
 	}
 
 //	public static void main(String[] args) {

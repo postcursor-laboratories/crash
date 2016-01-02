@@ -72,8 +72,8 @@ public class CrashClient {
 			public void run(){
 				try {
 					while(true){
-						world.readWorld(player.cliIn);
 						player.sendKeys();
+						world.readWorld(player.cliIn);
 					} 
 				} catch (IOException e1) {
 					throw new RuntimeException(e1);
@@ -109,6 +109,14 @@ public class CrashClient {
 				Thread.sleep(1000);
 			}catch(Exception e){}
 		}
-		new CrashClient();
+		new Thread("Client1"){public void run(){
+			new CrashClient();
+		}}.start();
+		try{
+			Thread.sleep(2000);
+		}catch(Exception e){}
+		new Thread("Client2"){public void run(){
+			new CrashClient();
+		}}.start();
 	}
 }

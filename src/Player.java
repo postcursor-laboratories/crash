@@ -15,6 +15,7 @@ public class Player {
 	boolean[] keys = new boolean[1 << 16];
 	
 	ArrayList<Integer> strokes = new ArrayList<>();
+	boolean initialized = false;
 	
 	public Player(DataOutputStream out, DataInputStream in){
 		cliOut = out;
@@ -22,9 +23,14 @@ public class Player {
 	}
 	
 	void act(World world){
+		if(keys[KeyEvent.VK_W]){
+			b.applyForce(new Vec2(0,30), b.getWorldCenter());
+		}
 		if(keys[KeyEvent.VK_A]){
-			System.out.println("FOO");
-			b.applyForce(new Vec2(1000,0), b.getLocalCenter());
+			b.applyForce(new Vec2(-20,0), b.getWorldCenter());
+		}
+		if(keys[KeyEvent.VK_D]){
+			b.applyForce(new Vec2(20,0), b.getWorldCenter());
 		}
 	}
 
@@ -32,7 +38,6 @@ public class Player {
 		//First send all the keys currently down, followed by -1 (to indicate end of list)
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
-				System.out.println("Down "+i);
 				cliOut.writeInt(i);
 			}
 		}
@@ -47,19 +52,24 @@ public class Player {
 	}
 	
 	void recvKeys() throws IOException{
-		int loc=0;
-		int nextDown;
-		while( (nextDown = cliIn.readInt()) != -1){
-			for(int i=loc; i<nextDown; i++)
-				keys[i] = false;
-			keys[nextDown] = true;
-		}
-		
-		strokes.clear();
-		
-		int numStrokes = cliIn.readInt();
-		for(int i=0; i<numStrokes; i++){
-			strokes.add(cliIn.readInt());
+		while(cliIn.available() > 0){
+			int loc=0;
+			int nextDown;
+			while( (nextDown = cliIn.readInt()) != -1){
+				for( ; loc<nextDown; loc++)
+					keys[loc] = false;
+				keys[nextDown] = true;
+				loc++;
+			}
+			while(loc<(1<<16))
+				keys[loc++]=false;
+			
+			strokes.clear();
+			
+			int numStrokes = cliIn.readInt();
+			for(int i=0; i<numStrokes; i++){
+				strokes.add(cliIn.readInt());
+			}
 		}
 	}
 }
