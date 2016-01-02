@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 public class CrashClient {
 	GameWorld world;
 	JFrame jf;
-	Canvas can;
+	Canvas _canvas;
 
 	Socket serv;
 	Player player;
@@ -25,15 +25,22 @@ public class CrashClient {
 
 	public CrashClient() {
 		jf = new JFrame();
-		jf.add(can = new Canvas());
-		can.setSize(W, H);
+		jf.add(_canvas = new Canvas());
+		_canvas.setSize(W, H);
 		jf.pack();
 		jf.setTitle("Client Viewer");
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		jf.setLocation(800, 300);
-		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
-
+//		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
+		
+		_canvas.setFocusable(true);
+		_canvas.requestFocus();
+		_canvas.createBufferStrategy(2);
+		
+		// this will block until the user leaves the menu
+		new Menu(_canvas);
+		
 		try {
 			serv=new Socket("184.187.175.50",42973);
 			//serv=new Socket("localhost",42973);
@@ -45,8 +52,8 @@ public class CrashClient {
 			e2.printStackTrace();
 			return;
 		}
-
-		can.addKeyListener(new KeyListener() {
+		
+		_canvas.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent e) {
 			}
 
@@ -61,9 +68,6 @@ public class CrashClient {
 				player.keys[e.getKeyCode()] = false;
 			}
 		});
-		
-		can.setFocusable(true);
-		can.requestFocus();
 
 		world = new GameWorld();
 		try {
@@ -86,8 +90,7 @@ public class CrashClient {
 		}.start();
 		
 		while(true){
-			can.createBufferStrategy(2);
-			BufferStrategy buff = can.getBufferStrategy();
+			BufferStrategy buff = _canvas.getBufferStrategy();
 			while (true) {
 				world.tick();
 				player.act(world._world);
@@ -105,14 +108,14 @@ public class CrashClient {
 	}
 
 	public static void main(String[] args) {
-		if(args.length > 0){
-			new Thread("Server"){public void run(){
-				new CrashServer();
-			}}.start();
-			try{
-				Thread.sleep(100);
-			}catch(Exception e){}
-		}
+//		if(args.length > 0){
+//			new Thread("Server"){public void run(){
+//				new CrashServer();
+//			}}.start();
+//			try{
+//				Thread.sleep(100);
+//			}catch(Exception e){}
+//		}
 		new Thread("Client"){public void run(){
 			new CrashClient();
 		}}.start();
