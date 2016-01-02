@@ -51,5 +51,4 @@ public class Player {
 			strokes.add(cliIn.readInt());
 		}
 	}
-	
 }

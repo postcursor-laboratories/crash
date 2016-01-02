@@ -46,7 +46,7 @@ public class GameWorld {
 	ArrayList<Body> goneBodies;
 	ArrayList<Body> newBodies;
 	
-	World w;
+	World _world;
 
 	public GameWorld(){
 		bodyIds = new HashMap<>();
@@ -55,7 +55,7 @@ public class GameWorld {
 		goneBodies = new ArrayList<>();
 		newBodies = new ArrayList<>();
 		
-		w = new World(new Vec2(0, GRAV), false);
+		_world = new World(new Vec2(0, GRAV), false);
 	}
 	
 	void init(){
@@ -64,7 +64,7 @@ public class GameWorld {
 			BodyDef beamDef = new BodyDef();
 			beamDef.type = BodyType.KINEMATIC;
 			beamDef.position = new Vec2(8, 0);
-			Body beam = w.createBody(beamDef);
+			Body beam = _world.createBody(beamDef);
 	
 			PolygonShape beamShape = new PolygonShape();
 			beamShape.setAsBox(8, 0.3f);
@@ -78,7 +78,7 @@ public class GameWorld {
 			BodyDef beamDef = new BodyDef();
 			beamDef.type = BodyType.KINEMATIC;
 			beamDef.position = new Vec2(-8, 0);
-			Body beam = w.createBody(beamDef);
+			Body beam = _world.createBody(beamDef);
 	
 			PolygonShape beamShape = new PolygonShape();
 			beamShape.setAsBox(8, 0.3f);
@@ -92,7 +92,7 @@ public class GameWorld {
 			BodyDef playerDef = new BodyDef();
 			playerDef.type = BodyType.DYNAMIC;
 			playerDef.position = new Vec2(0, 3.5f);
-			Body player = w.createBody(playerDef);
+			Body player = _world.createBody(playerDef);
 			
 			CircleShape playerShape = new CircleShape();
 			playerShape.m_radius = 2;
@@ -103,6 +103,34 @@ public class GameWorld {
 			addBody(player);
 		}
 
+	}
+	
+	void addWall(float x, float y, float w, float h, float friction) {
+		BodyDef beamDef = new BodyDef();
+		beamDef.type = BodyType.STATIC;
+		beamDef.position = new Vec2(x, y);
+		Body beam = _world.createBody(beamDef);
+
+		PolygonShape beamShape = new PolygonShape();
+		beamShape.setAsBox(w, h);
+		beam.createFixture(beamShape, .1f);
+		beam.m_fixtureList.m_friction = friction;
+		
+		addBody(beam);
+	}
+	
+	void addDynamicBox(float x, float y, float w, float h, float friction, float density) {
+		BodyDef boxDef = new BodyDef();
+		boxDef.type = BodyType.DYNAMIC;
+		boxDef.position = new Vec2(x, y);
+		Body box = _world.createBody(boxDef);
+
+		PolygonShape boxShape = new PolygonShape();
+		boxShape.setAsBox(w, h);
+		box.createFixture(boxShape, density);
+		box.m_fixtureList.m_friction = friction;
+		
+		addBody(box);
 	}
 	
 	void addBody(Body b){
@@ -134,8 +162,8 @@ public class GameWorld {
 		bodies.get(101).m_angularVelocity +=
 				+ (float)((Math.random()-0.51)/50);
 		
-		synchronized(w){
-			w.step(0.03f, 6, 3);
+		synchronized(_world){
+			_world.step(0.03f, 6, 3);
 		}
 	}
 	
@@ -195,7 +223,7 @@ public class GameWorld {
 		if(check!=1337)
 			throw new RuntimeException("Bad data feed: "+check);
 		
-		synchronized(w){
+		synchronized(_world){
 			int newBodyCount = cli.readInt();
 			for(int newBodyI = 0; newBodyI < newBodyCount; newBodyI++){
 				addBody(readNewBody(cli));
@@ -223,7 +251,7 @@ public class GameWorld {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.values()[bodyType];
 		bodyDef.position = new Vec2(0, 0);
-		Body b = w.createBody(bodyDef);
+		Body b = _world.createBody(bodyDef);
 		
 		while(cli.readByte()==10){//Another fixture
 			byte shapeType = cli.readByte();
@@ -270,7 +298,7 @@ public class GameWorld {
 		g.scale(scale, -scale);
 		trans = g.getTransform();
 		
-		synchronized(w){
+		synchronized(_world){
 			for(Body b : bodies.values()){
 				g.translate(
 					b.getPosition().x, b.getPosition().y
