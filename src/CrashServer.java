@@ -36,6 +36,7 @@ import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
 public class CrashServer {
 	GameWorld world;
+	private Leaderboard _leaderboard;
 	JFrame jf;
 	Canvas can;
 	
@@ -117,6 +118,12 @@ public class CrashServer {
 			world.sendWorld(cliOut);
 		} catch (IOException e1) {
 			throw new RuntimeException(e1);
+		}
+		
+		try {
+			_leaderboard = new Leaderboard("./leaderboard.txt", 10);
+		} catch (IOException e2) {
+			throw new RuntimeException("Couldn't open leaderboard!");
 		}
 		
 		bigLoop: while(true){

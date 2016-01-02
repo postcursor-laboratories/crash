@@ -62,7 +62,7 @@ public class CrashClient {
 		jf.setLocation(800, 300);
 
 		try {
-			serv=new Socket("184.187.175.50",42973);
+			serv=new Socket("localhost",42973);
 			servIn=new DataInputStream(serv.getInputStream());
 			System.out.println(serv.getInputStream().getClass());
 			servOut=new DataOutputStream(serv.getOutputStream());
