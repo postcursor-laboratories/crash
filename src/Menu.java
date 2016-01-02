@@ -4,13 +4,16 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 @SuppressWarnings("serial")
 public class Menu {
 	// so that we can navigate between different screens
 	private Stack<MenuEntry[]> _menuHistory;
 	private int _selectionIndex = 0; // index into _currentEntries of currently highlighted menu item
+	private Settings _settings;
 	
 	private MenuEntry[] _entries = {
 			new MenuEntry("start game!", () -> {
@@ -18,13 +21,27 @@ public class Menu {
 				// causes the main loop in Menu() to exit, and we return to the CrashClient constructor, which starts the game
 				_shouldClose = true;
 			}),
-			new MenuEntry("settings", () -> { _menuHistory.push(new MenuEntry[]{
-					new MenuEntry("setting 1", () -> System.out.println("setting uno!")),
-					new MenuEntry("setting 2", () -> System.out.println("setting dos!")),
+			
+			new MenuEntry("settings", () -> {
+				_settings = new Settings();
+				_menuHistory.push(new MenuEntry[]{
+					new MenuEntry(() -> "player name: "+_settings._playerName, () -> {
+						//_settings._playerName = "foobar"; // TODO somehow get new name
+					}),
+					new MenuEntry(() -> "server IP: "+_settings._serverIP, () -> {
+						//_settings._serverIP = "foo.bar"; // TODO somehow get new server IP
+					}),
 					new MenuEntry("setting 3", () -> System.out.println("setting tres!")),
 					new MenuEntry("setting 4", () -> System.out.println("setting quatro!")),
-					new MenuEntry("back", () -> { _menuHistory.pop(); _selectionIndex = 0; }),
-			}); _selectionIndex = 0; }),
+					new MenuEntry("back", () -> {
+						_menuHistory.pop();
+						_selectionIndex = 0;
+						_settings.save();
+					}),
+				});
+				_selectionIndex = 0;
+			}),
+			
 			new MenuEntry("quit", () -> System.exit(0)),
 	};
 	
@@ -72,10 +89,8 @@ public class Menu {
 			g.setFont(Resources.getFont(50));
 			
 			MenuEntry[] entries = _menuHistory.peek();
-			if (entries != null) {
-				for (int i = 0; i < entries.length; i++) {
-					g.drawString((_selectionIndex == i ? "-> " : "") + entries[i].head, 100, 200+50*i);
-				}
+			for (int i = 0; i < entries.length; i++) {
+				g.drawString((_selectionIndex == i ? "-> " : "") + entries[i].head.get(), 100, 200+50*i);
 			}
 			
 			buff.show();
@@ -90,8 +105,12 @@ public class Menu {
 	}
 	
 	// trolololololollll
-	private class MenuEntry extends Pair<String, Runnable>{
+	private class MenuEntry extends Pair<Supplier<String>, Runnable>{
 		public MenuEntry(String name, Runnable action){
+			this(() -> name, action);
+		}
+		
+		public MenuEntry(Supplier<String> name, Runnable action){
 			super(name, action);
 		}
 	}

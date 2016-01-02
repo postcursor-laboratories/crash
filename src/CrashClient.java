@@ -31,7 +31,7 @@ public class CrashClient {
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		jf.setLocation(800, 300);
-//		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
+		jf.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		
 		_canvas.setFocusable(true);
 		_canvas.requestFocus();

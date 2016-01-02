@@ -32,6 +32,9 @@ public class Player {
 		if(keys[KeyEvent.VK_D]){
 			b.applyForce(new Vec2(20,0), b.getWorldCenter());
 		}
+		if(keys[KeyEvent.VK_K]){
+			System.exit(0);
+		}
 	}
 
 	void sendKeys() throws IOException{
