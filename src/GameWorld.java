@@ -41,6 +41,8 @@ public class GameWorld {
 	ArrayList<Body> newDeadBodies;
 	
 	World _world;
+	
+	Player _currPlayer;
 
 	public GameWorld(){
 		bodyIds = new HashMap<>();
@@ -248,6 +250,8 @@ public class GameWorld {
 	}
 
 	void readInit(DataInputStream cli, Player player) throws IOException {
+		_currPlayer = player;
+		
 		synchronized(_world){
 			int newBodyCount = cli.readInt();
 
@@ -259,7 +263,7 @@ public class GameWorld {
 				deadBodies.add(bodies.get(cli.readInt()));
 			}
 		}
-		player.b = bodies.get(cli.readInt());
+		_currPlayer.b = bodies.get(cli.readInt());
 	}
 	
 	void readWorld(DataInputStream cli) throws IOException{
@@ -342,8 +346,23 @@ public class GameWorld {
 		g.setColor(Color.BLACK);
 		
 		AffineTransform trans;
-		g.translate(W/2, H/2);
+		g.translate(W/2, H/2);		
 		g.scale(scale, -scale);
+		
+		float mapW = 65;
+		float screenW = Resources.W / scale;
+		if(screenW < mapW){
+			float leftover = (screenW - mapW);
+			g.translate(leftover*(_currPlayer.b.getPosition().x)/mapW, 0);
+		}
+		
+		float mapH = 34;
+		float screenH = Resources.H / scale;
+		if(screenH < mapH){
+			float leftover = (screenH - mapH);
+			g.translate(0, leftover*(_currPlayer.b.getPosition().y)/mapH);
+		}
+		
 		trans = g.getTransform();
 		
 		synchronized(_world){
