@@ -41,6 +41,8 @@ public class GameWorld {
 	ArrayList<Body> newDeadBodies;
 	
 	World _world;
+	
+	Player clientplayer; // Remains uninitialized in server, in client equals the player passed in readInit
 
 	public GameWorld(){
 		bodyIds = new HashMap<>();
@@ -248,6 +250,7 @@ public class GameWorld {
 	}
 
 	void readInit(DataInputStream cli, Player player) throws IOException {
+		clientplayer = player;
 		synchronized(_world){
 			int newBodyCount = cli.readInt();
 
@@ -378,7 +381,9 @@ public class GameWorld {
 					
 					if (deadBodies.contains(b)) {
 						g.setColor(Color.RED);
-					} else {
+					} else if (b == clientplayer.getBody()){
+						g.setColor(Color.BLUE); // Color your player differently.
+					} else{
 						g.setColor(Color.BLACK);
 					}
 

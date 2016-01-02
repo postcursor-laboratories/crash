@@ -79,4 +79,9 @@ public class Player {
 		world.deadBodies.add(b);
 		world.newDeadBodies.add(b);
 	}
+	
+	public Body getBody()
+	{
+		return this.b;
+	}
 }
