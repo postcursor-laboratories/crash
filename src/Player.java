@@ -36,12 +36,10 @@ public class Player {
 		if(keys[KeyEvent.VK_D]){
 			b.applyForce(new Vec2(20,0), b.getWorldCenter());
 		}
-		if(keys[KeyEvent.VK_K]){
-			System.exit(0);
-		}
 	}
 
 	void sendKeys() throws IOException{
+	    clientSideKeyProcessing();
 		//First send all the keys currently down, followed by -1 (to indicate end of list)
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
@@ -60,7 +58,16 @@ public class Player {
 //		}
 	}
 	
-	void sendInit() throws IOException{
+	/**
+	 * Process client-side bindings.
+	 */
+	private void clientSideKeyProcessing() {
+        if(keys[KeyEvent.VK_K]){
+            System.exit(0);
+        }
+    }
+
+    void sendInit() throws IOException{
 		//Currently just send the player's name.
 		cliOut.writeChars(this.name);
 		cliOut.writeChar('\00');
