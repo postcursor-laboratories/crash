@@ -112,12 +112,12 @@ public class Player {
 		    int loc = 0;
 		    for (Key key : keyData.getKeyList()) {
 		        int nextDown = key.getKeyCode();
-                for( ; loc<nextDown; loc++)
+                for( ; loc<nextDown && loc < keys.length; loc++)
                     keys[loc] = false;
                 keys[nextDown] = true;
                 loc++;
 		    }
-			while(loc<(1<<16))
+			while(loc < keys.length)
 				keys[loc++]=false;
 			
 //			strokes.clear();
