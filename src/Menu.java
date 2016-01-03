@@ -20,6 +20,14 @@ public class Menu {
 	private MenuEntry[] _entries = {
 			new MenuEntry("start game!", () -> {
 				System.out.println("BOOP GAME START");
+				
+				// change "start game!" to connecting text; this just makes it more obvious when the server is down
+				// TODO handle server connection issues and client lobby intelligently
+				_menuHistory.peek()[0] = new MenuEntry("[connecting....]", () -> {});
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException e) {}
+
 				// causes the main loop in Menu() to exit, and we return to the CrashClient constructor, which starts the game
 				_shouldClose = true;
 			}),
