@@ -121,7 +121,7 @@ public class CrashServer {
 						player.act(world._world);
 						actTime += System.currentTimeMillis();
 						
-					} catch (IOException e1) {
+					} catch (Exception e1) {
 						playersToRemove.add(player);
 //						throw new RuntimeException(e1);
 						sendTime += System.currentTimeMillis();
