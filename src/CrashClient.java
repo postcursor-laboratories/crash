@@ -1,5 +1,6 @@
 import java.awt.Canvas;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
@@ -18,7 +19,7 @@ public class CrashClient {
 	Socket serv;
 	Player player;
 
-	static final int W = Resources.W, H = Resources.H;
+	static int W = Resources.W, H = Resources.H;
 	
 	long lostTime;
 
@@ -32,6 +33,10 @@ public class CrashClient {
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		jf.setLocation(800, 300);
 		jf.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        
+        Insets i = jf.getInsets();
+        W = Resources.W = jf.getWidth() - i.left - i.right;
+        H = Resources.H = jf.getHeight() - i.top - i.bottom;
 		
 		_canvas.setFocusable(true);
 		_canvas.requestFocus();
