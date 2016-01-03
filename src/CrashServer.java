@@ -54,7 +54,7 @@ public class CrashServer {
 					DataOutputStream cliOut = new DataOutputStream(cli.getOutputStream());
 					DataInputStream cliIn = new DataInputStream(cli.getInputStream());
 					synchronized(players){
-						Player player = new Player(cliOut, cliIn);
+						Player player = new Player(cliOut, cliIn, "");
 						world.createPlayer(player);
 //						world.sendInit(player.cliOut, player);
 	
@@ -108,7 +108,10 @@ public class CrashServer {
 						sendTime -= System.currentTimeMillis();
 						if(!player.initialized){
 							world.sendInit(player.cliOut, player);
-						} else {
+						}else if(!player.nameset){
+							player.recvInit();
+						}
+						else {
 							world.sendWorld(player.cliOut);
 						}
 						sendTime += System.currentTimeMillis();

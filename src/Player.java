@@ -17,9 +17,13 @@ public class Player {
 	ArrayList<Integer> strokes = new ArrayList<>();
 	boolean initialized = false;
 	
-	public Player(DataOutputStream out, DataInputStream in){
+	String name;
+	boolean nameset = false;
+	
+	public Player(DataOutputStream out, DataInputStream in, String newName){
 		cliOut = out;
 		cliIn = in;
+		name = newName;
 	}
 	
 	void act(World world){
@@ -54,6 +58,22 @@ public class Player {
 //	
 //			strokes.clear();
 //		}
+	}
+	
+	void sendInit() throws IOException{
+		//Currently just send the player's name.
+		cliOut.writeChars(this.name);
+		cliOut.writeChar('\00');
+	}
+	
+	void recvInit() throws IOException{
+		char in;
+		while((in = cliIn.readChar()) != '\00')
+		{
+			this.name += in;
+		}
+		this.nameset = true;
+		System.out.println("Name Recieved: "+this.name);
 	}
 	
 	void recvKeys() throws IOException{

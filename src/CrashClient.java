@@ -44,8 +44,10 @@ public class CrashClient {
 			serv=new Socket(Settings._serverIP,42973);
 			player = new Player(
 					new DataOutputStream(serv.getOutputStream()),
-					new DataInputStream(serv.getInputStream())
+					new DataInputStream(serv.getInputStream()),
+					Settings._playerName
 							);
+			player.nameset = true;
 		} catch (IOException e2) {
 			e2.printStackTrace();
 			return;
@@ -70,6 +72,11 @@ public class CrashClient {
 		world = new GameWorld();
 		try {
 			world.readInit(player.cliIn, player);
+		} catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
+		try {
+			player.sendInit();
 		} catch (IOException e1) {
 			throw new RuntimeException(e1);
 		}
