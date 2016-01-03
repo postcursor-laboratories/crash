@@ -9,12 +9,14 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 
-import protos.KeyProto.Key;
+import com.google.protobuf.MessageLite;
+
+import protos.HandshakeProto.PlayerData;
 import protos.KeyProto.Keys;
 
 public class Player {
-    private static final int KEY_START = 0x1234;
-    private static final int KEY_END = 0x4321;
+    private static final int PACKET_START = 0x1234;
+    private static final int PACKET_END = 0x4321;
     
 	Body b;
 	DataOutputStream cliOut;
@@ -32,6 +34,27 @@ public class Player {
 		cliOut = out;
 		cliIn = in;
 		name = newName;
+	}
+	
+	void writeData(MessageLite data) throws IOException {
+        cliOut.writeInt(PACKET_START);
+        for (byte b : data.toByteArray()) {
+            cliOut.writeInt(b);
+        }
+        cliOut.writeInt(PACKET_END);
+	}
+	
+	byte[] readData() throws IOException {
+        if (cliIn.readInt() != PACKET_START) {
+            // ignore random bytes on stream
+            return null;
+        }
+        recorder.reset();
+        int read = -1;
+        while ((read = cliIn.readInt()) != PACKET_END) {
+            recorder.write(read);
+        }
+        return recorder.toByteArray();
 	}
 	
 	void act(World world){
@@ -52,15 +75,11 @@ public class Player {
 	    Keys.Builder keyData = Keys.newBuilder();
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
-			    keyData.addKey(Key.newBuilder().setKeyCode(i));
+			    keyData.addKey(i);
 			}
 		}
 		// TODO better packets lol
-        cliOut.writeInt(KEY_START);
-		for (byte b : keyData.build().toByteArray()) {
-		    cliOut.writeInt(b);
-		}
-        cliOut.writeInt(KEY_END);
+        writeData(keyData.build());
 		
 //		synchronized(strokes){
 //			//Next send all of the keystrokes received
@@ -83,35 +102,21 @@ public class Player {
 
     void sendInit() throws IOException{
 		//Currently just send the player's name.
-		cliOut.writeChars(this.name);
-		cliOut.writeChar('\00');
+        PlayerData data = PlayerData.newBuilder().setName(name).build();
+        writeData(data);
 	}
 	
 	void recvInit() throws IOException{
-		char in;
-		while((in = cliIn.readChar()) != '\00')
-		{
-			this.name += in;
-		}
+	    this.name = PlayerData.parseFrom(readData()).getName();
 		this.nameset = true;
 		System.out.println("Name Recieved: "+this.name);
 	}
 	
 	void recvKeys() throws IOException{
 		while(cliIn.available() >= 4){
-		    if (cliIn.readInt() != KEY_START) {
-		        // ignore random bytes on stream
-		        continue;
-		    }
-		    recorder.reset();
-		    int read = -1;
-		    while ((read = cliIn.readInt()) != KEY_END) {
-		        recorder.write(read);
-		    }
-		    Keys keyData = Keys.parseFrom(recorder.toByteArray());
+		    Keys keyData = Keys.parseFrom(readData());
 		    int loc = 0;
-		    for (Key key : keyData.getKeyList()) {
-		        int nextDown = key.getKeyCode();
+		    for (int nextDown : keyData.getKeyList()) {
                 for( ; loc<nextDown && loc < keys.length; loc++)
                     keys[loc] = false;
                 keys[nextDown] = true;
