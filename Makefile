@@ -3,16 +3,18 @@ JAVA=java
 CLASSPATH=./lib/jbox2d-library-2.1.2.2.jar:./lib/slf4j-api-1.6.4.jar:./bin
 JCFLAGS=-cp $(CLASSPATH) -d ./bin
 
-all: bin
+all: build
+
+build: bin
 	$(JC) $(JCFLAGS) src/*.java
 
 bin:
 	mkdir bin
 
-run:
+run: build
 	$(JAVA) -cp $(CLASSPATH) CrashClient
 
-runserver:
+runserver: build
 	$(JAVA) -cp $(CLASSPATH) CrashServer
 
 clean:
