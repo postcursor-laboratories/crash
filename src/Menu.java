@@ -90,6 +90,9 @@ public class Menu {
 				} else {
 					if(e.getKeyCode() == KeyEvent.VK_ENTER){
 						_enteringText = false;
+
+	                    if (_toRunWhenTextEntered != null)
+	                        _toRunWhenTextEntered.run();
 					}
 				}
 			}
@@ -109,9 +112,6 @@ public class Menu {
 						if (_textField.length() < 64)
 							_textField += e.getKeyChar();
 					}
-					
-					if (_toRunWhenTextEntered != null)
-						_toRunWhenTextEntered.run();
 				}
 			}
 			
