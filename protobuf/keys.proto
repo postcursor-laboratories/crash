@@ -1,0 +1,8 @@
+package protos;
+
+option java_package = "protos";
+option java_outer_classname = "KeyProto";
+
+message Keys {
+    repeated int32 key = 1 [packed=true];
+}

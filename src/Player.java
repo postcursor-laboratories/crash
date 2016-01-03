@@ -1,4 +1,5 @@
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,11 +9,20 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 
+import com.google.protobuf.MessageLite;
+
+import protos.HandshakeProto.PlayerData;
+import protos.KeyProto.Keys;
+
 public class Player {
+    private static final int PACKET_START = 0x1234;
+    private static final int PACKET_END = 0x4321;
+    
 	Body b;
 	DataOutputStream cliOut;
 	DataInputStream cliIn;
 	boolean[] keys = new boolean[1 << 16];
+	private final ByteArrayOutputStream recorder = new ByteArrayOutputStream(128);
 	
 	ArrayList<Integer> strokes = new ArrayList<>();
 	boolean initialized = false;
@@ -24,6 +34,27 @@ public class Player {
 		cliOut = out;
 		cliIn = in;
 		name = newName;
+	}
+	
+	void writeData(MessageLite data) throws IOException {
+        cliOut.writeInt(PACKET_START);
+        for (byte b : data.toByteArray()) {
+            cliOut.writeInt(b);
+        }
+        cliOut.writeInt(PACKET_END);
+	}
+	
+	byte[] readData() throws IOException {
+        if (cliIn.readInt() != PACKET_START) {
+            // ignore random bytes on stream
+            return null;
+        }
+        recorder.reset();
+        int read = -1;
+        while ((read = cliIn.readInt()) != PACKET_END) {
+            recorder.write(read);
+        }
+        return recorder.toByteArray();
 	}
 	
 	void act(World world){
@@ -40,13 +71,15 @@ public class Player {
 
 	void sendKeys() throws IOException{
 	    clientSideKeyProcessing();
-		//First send all the keys currently down, followed by -1 (to indicate end of list)
+		//First send all the keys currently down
+	    Keys.Builder keyData = Keys.newBuilder();
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
-				cliOut.writeInt(i);
+			    keyData.addKey(i);
 			}
 		}
-		cliOut.writeInt(-1);
+		// TODO better packets lol
+        writeData(keyData.build());
 		
 //		synchronized(strokes){
 //			//Next send all of the keystrokes received
@@ -69,31 +102,27 @@ public class Player {
 
     void sendInit() throws IOException{
 		//Currently just send the player's name.
-		cliOut.writeChars(this.name);
-		cliOut.writeChar('\00');
+        PlayerData data = PlayerData.newBuilder().setName(name).build();
+        writeData(data);
 	}
 	
 	void recvInit() throws IOException{
-		char in;
-		while((in = cliIn.readChar()) != '\00')
-		{
-			this.name += in;
-		}
+	    this.name = PlayerData.parseFrom(readData()).getName();
 		this.nameset = true;
 		System.out.println("Name Recieved: "+this.name);
 	}
 	
 	void recvKeys() throws IOException{
 		while(cliIn.available() >= 4){
-			int loc=0;
-			int nextDown;
-			while( (nextDown = cliIn.readInt()) != -1){
-				for( ; loc<nextDown; loc++)
-					keys[loc] = false;
-				keys[nextDown] = true;
-				loc++;
-			}
-			while(loc<(1<<16))
+		    Keys keyData = Keys.parseFrom(readData());
+		    int loc = 0;
+		    for (int nextDown : keyData.getKeyList()) {
+                for( ; loc<nextDown && loc < keys.length; loc++)
+                    keys[loc] = false;
+                keys[nextDown] = true;
+                loc++;
+		    }
+			while(loc < keys.length)
 				keys[loc++]=false;
 			
 //			strokes.clear();
