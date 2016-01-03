@@ -7,11 +7,14 @@ import java.awt.image.BufferStrategy;
 import java.util.Stack;
 import java.util.function.Supplier;
 
-@SuppressWarnings("serial")
 public class Menu {
 	// so that we can navigate between different screens
 	private Stack<MenuEntry[]> _menuHistory;
 	private int _selectionIndex = 0; // index into _currentEntries of currently highlighted menu item
+	
+	private boolean _enteringText = false; // if set to true, keyPressed simply appends text to _textField
+	private String _textField = "";
+	private Runnable _toRunWhenTextEntered = null;
 	
 	private MenuEntry[] _entries = {
 			new MenuEntry("start game!", () -> {
@@ -23,10 +26,14 @@ public class Menu {
 			new MenuEntry("settings", () -> {
 				_menuHistory.push(new MenuEntry[]{
 					new MenuEntry(() -> "player name: "+Settings._playerName, () -> {
-						//_settings._playerName = "foobar"; // TODO somehow get new name
+						_textField = Settings._playerName;
+						_toRunWhenTextEntered = () -> Settings._playerName = _textField;
+						_enteringText = true;
 					}),
 					new MenuEntry(() -> "server IP: "+Settings._serverIP, () -> {
-						//_settings._serverIP = "foo.bar"; // TODO somehow get new server IP
+						_textField = Settings._serverIP;
+						_toRunWhenTextEntered = () -> Settings._serverIP = _textField;
+						_enteringText = true;
 					}),
 					new MenuEntry("setting 3", () -> System.out.println("setting tres!")),
 					new MenuEntry("setting 4", () -> System.out.println("setting quatro!")),
@@ -44,31 +51,57 @@ public class Menu {
 	
 	private boolean _shouldClose = false;
 	
+	@SuppressWarnings("serial")
 	public Menu(Canvas canvas) {
 		_menuHistory = new Stack<MenuEntry[]>(){{ push(_entries); }};
 		
 		KeyListener listener;
 		canvas.addKeyListener(listener = new KeyListener(){
 			public void keyPressed(KeyEvent e) {
-				switch (e.getKeyCode()) {
-				case KeyEvent.VK_S:
-				case KeyEvent.VK_DOWN:
-					_selectionIndex = (_selectionIndex+1) % _menuHistory.peek().length;
-					break;
+				if (!_enteringText) {
+					switch (e.getKeyCode()) {
+					case KeyEvent.VK_S:
+					case KeyEvent.VK_DOWN:
+						_selectionIndex = (_selectionIndex+1) % _menuHistory.peek().length;
+						break;
+						
+					case KeyEvent.VK_W:
+					case KeyEvent.VK_UP:
+						_selectionIndex = (_selectionIndex-1+_menuHistory.peek().length) % _menuHistory.peek().length;
+						break;
 					
-				case KeyEvent.VK_W:
-				case KeyEvent.VK_UP:
-					_selectionIndex = (_selectionIndex-1+_menuHistory.peek().length) % _menuHistory.peek().length;
-					break;
-				
-				case KeyEvent.VK_ENTER:
-				case KeyEvent.VK_SPACE:
-					_menuHistory.peek()[_selectionIndex].tail.run();
-					break;
+					case KeyEvent.VK_ENTER:
+						_menuHistory.peek()[_selectionIndex].tail.run();
+						break;
+					}
+				} else {
+					if(e.getKeyCode() == KeyEvent.VK_ENTER){
+						_enteringText = false;
+					}
 				}
 			}
 			
-			public void keyTyped(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (_enteringText) {
+					switch (e.getKeyChar()) {
+					case '\n':
+						// do nothing; leaving the entry field is handled in keyPressed
+						break;
+					case '\b':
+						if (_textField.length() > 0)
+							_textField = _textField.substring(0,_textField.length()-1);
+						break;
+					default:
+						// because I know you folks and you are going to mess with this
+						if (_textField.length() < 64)
+							_textField += e.getKeyChar();
+					}
+					
+					if (_toRunWhenTextEntered != null)
+						_toRunWhenTextEntered.run();
+				}
+			}
+			
 			public void keyReleased(KeyEvent e) {}
 		});
 		
@@ -87,7 +120,8 @@ public class Menu {
 			
 			MenuEntry[] entries = _menuHistory.peek();
 			for (int i = 0; i < entries.length; i++) {
-				g.drawString((_selectionIndex == i ? "-> " : "") + entries[i].head.get(), 100, 200+50*i);
+				g.drawString((_selectionIndex == i ? "-> " : "") + entries[i].head.get()+
+						(_enteringText && _selectionIndex == i?"_":""), 100, 200+50*i);
 			}
 			
 			buff.show();
