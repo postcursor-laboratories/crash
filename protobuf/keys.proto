@@ -1,0 +1,12 @@
+package protos;
+
+option java_package = "protos";
+option java_outer_classname = "KeyProto";
+
+message Key {
+    required int32 keyCode = 1;
+}
+
+message Keys {
+    repeated Key keys = 1;
+}
