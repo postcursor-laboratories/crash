@@ -41,7 +41,7 @@ public class CrashClient {
 		new Menu(_canvas);
 		
 		try {
-			serv=new Socket(Settings._serverIP,42973);
+			serv=new Socket(Settings._serverIP, Settings._serverPort);
 			player = new Player(
 					new DataOutputStream(serv.getOutputStream()),
 					new DataInputStream(serv.getInputStream()),

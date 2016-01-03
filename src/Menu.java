@@ -36,7 +36,11 @@ public class Menu {
 						_toRunWhenTextEntered = () -> Settings._serverIP = _textField;
 						_enteringText = true;
 					}),
-					new MenuEntry("setting 3", () -> System.out.println("setting tres!")),
+                    new MenuEntry(() -> "server port: "+Settings._serverPort, () -> {
+                         _textField = Settings._serverPort + "";
+                         _toRunWhenTextEntered = () -> Settings._serverPort = Integer.parseInt(_textField); // psh, error checking is for fools
+                         _enteringText = true;
+                    }),
 					new MenuEntry("setting 4", () -> System.out.println("setting quatro!")),
 					new MenuEntry("back", () -> {
 						_menuHistory.pop();

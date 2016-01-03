@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 public class Settings {
 	static String _playerName = "default";
 	static String _serverIP = "184.187.175.50";
+    static int _serverPort = 42973;
 	
 	static {
 		load();
@@ -17,6 +18,7 @@ public class Settings {
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(AppDataManager.getAppDataFile("settings")));
 			out.writeUTF(_playerName);
 			out.writeUTF(_serverIP);
+            out.writeInt(_serverPort);
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -29,6 +31,7 @@ public class Settings {
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(AppDataManager.getAppDataFile("settings")));
 			_playerName = in.readUTF();
 			_serverIP = in.readUTF();
+            _serverPort = in.readInt();
 			in.close();
 		} catch (IOException e) {
 			System.out.println("Warning: could not load settings file; assuming default values");
