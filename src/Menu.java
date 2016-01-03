@@ -1,6 +1,7 @@
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
@@ -109,6 +110,19 @@ public class Menu {
 		while (!_shouldClose) {
 			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 			
+			g.addRenderingHints(new RenderingHints(
+		             RenderingHints.KEY_TEXT_ANTIALIASING,
+		             RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
+		    g.addRenderingHints(new RenderingHints(
+		             RenderingHints.KEY_ANTIALIASING,
+		             RenderingHints.VALUE_ANTIALIAS_ON));
+		    g.addRenderingHints(new RenderingHints(
+		             RenderingHints.KEY_RENDERING,
+		             RenderingHints.VALUE_RENDER_QUALITY));
+		    g.addRenderingHints(new RenderingHints(
+		             RenderingHints.KEY_INTERPOLATION,
+		             RenderingHints.VALUE_INTERPOLATION_BICUBIC));
+		    
 			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, Resources.W, Resources.H);
 			g.setColor(Color.BLACK);

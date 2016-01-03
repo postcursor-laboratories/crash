@@ -87,7 +87,7 @@ public class CrashServer {
 		}
 
 		can.createBufferStrategy(2);
-		BufferStrategy buff = can.getBufferStrategy();
+//		BufferStrategy buff = can.getBufferStrategy();
 		while(true){
 //			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 //			world.draw(g, W, H);
