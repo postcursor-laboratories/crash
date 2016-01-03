@@ -12,3 +12,4 @@ out/*.jar
 .project
 .metadata/
 .settings/
+/bin/

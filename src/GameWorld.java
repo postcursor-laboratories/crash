@@ -410,6 +410,8 @@ public class GameWorld {
 					
 					if (deadBodies.contains(b)) {
 						g.setColor(Color.RED);
+					} else if(b == _currPlayer.b) {
+						g.setColor(Color.BLUE);
 					} else {
 						g.setColor(Color.BLACK);
 					}
