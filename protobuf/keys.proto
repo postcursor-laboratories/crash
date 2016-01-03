@@ -8,5 +8,5 @@ message Key {
 }
 
 message Keys {
-    repeated Key keys = 1;
+    repeated Key key = 1;
 }

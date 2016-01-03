@@ -1,4 +1,5 @@
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,11 +9,18 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 
+import protos.KeyProto.Key;
+import protos.KeyProto.Keys;
+
 public class Player {
+    private static final int KEY_START = 0x1234;
+    private static final int KEY_END = 0x4321;
+    
 	Body b;
 	DataOutputStream cliOut;
 	DataInputStream cliIn;
 	boolean[] keys = new boolean[1 << 16];
+	private final ByteArrayOutputStream recorder = new ByteArrayOutputStream(128);
 	
 	ArrayList<Integer> strokes = new ArrayList<>();
 	boolean initialized = false;
@@ -40,13 +48,19 @@ public class Player {
 
 	void sendKeys() throws IOException{
 	    clientSideKeyProcessing();
-		//First send all the keys currently down, followed by -1 (to indicate end of list)
+		//First send all the keys currently down
+	    Keys.Builder keyData = Keys.newBuilder();
 		for(int i=0; i<(1<<16); i++){
 			if(keys[i]){
-				cliOut.writeInt(i);
+			    keyData.addKey(Key.newBuilder().setKeyCode(i));
 			}
 		}
-		cliOut.writeInt(-1);
+		// TODO better packets lol
+        cliOut.writeInt(KEY_START);
+		for (byte b : keyData.build().toByteArray()) {
+		    cliOut.writeInt(b);
+		}
+        cliOut.writeInt(KEY_END);
 		
 //		synchronized(strokes){
 //			//Next send all of the keystrokes received
@@ -85,14 +99,24 @@ public class Player {
 	
 	void recvKeys() throws IOException{
 		while(cliIn.available() >= 4){
-			int loc=0;
-			int nextDown;
-			while( (nextDown = cliIn.readInt()) != -1){
-				for( ; loc<nextDown; loc++)
-					keys[loc] = false;
-				keys[nextDown] = true;
-				loc++;
-			}
+		    if (cliIn.readInt() != KEY_START) {
+		        // ignore random bytes on stream
+		        continue;
+		    }
+		    recorder.reset();
+		    int read = -1;
+		    while ((read = cliIn.readInt()) != KEY_END) {
+		        recorder.write(read);
+		    }
+		    Keys keyData = Keys.parseFrom(recorder.toByteArray());
+		    int loc = 0;
+		    for (Key key : keyData.getKeyList()) {
+		        int nextDown = key.getKeyCode();
+                for( ; loc<nextDown; loc++)
+                    keys[loc] = false;
+                keys[nextDown] = true;
+                loc++;
+		    }
 			while(loc<(1<<16))
 				keys[loc++]=false;
 			
