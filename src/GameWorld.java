@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -340,6 +341,18 @@ public class GameWorld {
 	}
 	
 	void draw(Graphics2D g, int W, int H){
+	    g.addRenderingHints( new RenderingHints(
+	             RenderingHints.KEY_TEXT_ANTIALIASING,
+	             RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
+	    g.addRenderingHints( new RenderingHints(
+	             RenderingHints.KEY_ANTIALIASING,
+	             RenderingHints.VALUE_ANTIALIAS_ON));
+	    g.addRenderingHints( new RenderingHints(
+	             RenderingHints.KEY_RENDERING,
+	             RenderingHints.VALUE_RENDER_QUALITY));
+	    g.addRenderingHints( new RenderingHints(
+	             RenderingHints.KEY_INTERPOLATION,
+	             RenderingHints.VALUE_INTERPOLATION_BICUBIC));
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, W, H);
 		
