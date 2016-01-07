@@ -50,10 +50,11 @@ public class Menu {
 			new TextDisplayMenuEntry("about",
 					"Crash v0.smol, by Postcursor Laboratories, January 2016",
 					"Postcursor Laboratories is a derivative of 1064CBread LLC",
-					"(and is also undeniably hella)"), // you don't need git blame for this
+					"(and is also undeniably hella)"), // you don't need git
+														// blame for this
 			new ActionMenuEntry("quit", () -> System.exit(0)) };
 	private boolean _shouldClose = false;
-	
+
 	@SuppressWarnings("serial")
 	public Menu(Canvas canvas) {
 		_menuHistory = new Stack<MenuEntry[]>() {
@@ -68,27 +69,43 @@ public class Menu {
 
 			public void keyPressed(KeyEvent e) {
 				if (!_enteringText) {
+					int lastIndex = _selectionIndex;
 					switch (e.getKeyCode()) {
 						case KeyEvent.VK_S:
 						case KeyEvent.VK_DOWN:
+							if (lastIndex == -1) {
+								break;
+							}
 							do {
 								_selectionIndex = (_selectionIndex + 1)
 										% _menuHistory.peek().length;
-							} while (_menuHistory.peek()[_selectionIndex]
-									instanceof UnselectableMenuEntry);
+							} while (_menuHistory
+									.peek()[_selectionIndex] instanceof UnselectableMenuEntry && _selectionIndex != lastIndex);
+							if (_selectionIndex == lastIndex) {
+								_selectionIndex = -1;
+							}
 							break;
 
 						case KeyEvent.VK_W:
 						case KeyEvent.VK_UP:
+							if (lastIndex == -1) {
+								break;
+							}
 							do {
 								_selectionIndex = (_selectionIndex - 1
 										+ _menuHistory.peek().length)
 										% _menuHistory.peek().length;
-							} while (_menuHistory.peek()[_selectionIndex]
-									instanceof UnselectableMenuEntry);
+							} while (_menuHistory
+									.peek()[_selectionIndex] instanceof UnselectableMenuEntry && _selectionIndex != lastIndex);
+							if (_selectionIndex == lastIndex) {
+								_selectionIndex = -1;
+							}
 							break;
 
 						case KeyEvent.VK_ENTER:
+							if (lastIndex == -1) {
+								break;
+							}
 							MenuEntry menu =
 									_menuHistory.peek()[_selectionIndex];
 							if (menu instanceof ActionMenuEntry) {
@@ -96,10 +113,14 @@ public class Menu {
 							} else if (menu instanceof TransitionMenuEntry) {
 								_menuHistory.push(((TransitionMenuEntry) menu)
 										.getSubEntries());
+								int length = _menuHistory.peek().length;
 								_selectionIndex = 0;
-								while (_menuHistory.peek()[_selectionIndex]
-										instanceof UnselectableMenuEntry) {
+								while (_menuHistory
+										.peek()[_selectionIndex] instanceof UnselectableMenuEntry && _selectionIndex < length) {
 									_selectionIndex++;
+								}
+								if (_selectionIndex == length) {
+									_selectionIndex = -1;
 								}
 							} else if (menu instanceof EditableMenuEntry) {
 								_toRunWhenTextEntered =
@@ -129,6 +150,11 @@ public class Menu {
 
 			public void keyTyped(KeyEvent e) {
 				if (_enteringText) {
+					if (_selectionIndex == -1) {
+						// sanity check
+						_enteringText = false;
+						return;
+					}
 					EditableMenuEntry editable =
 							(EditableMenuEntry) _menuHistory
 									.peek()[_selectionIndex];
@@ -187,7 +213,7 @@ public class Menu {
 			g.setFont(Resources.getFont(100));
 			g.drawString("CRASH", 100, 100);
 			g.setFont(Resources.getFont(50));
-			
+
 			MenuEntry[] entries = _menuHistory.peek();
 			for (int i = 0; i < entries.length; i++) {
 				g.drawString(
@@ -227,6 +253,7 @@ public class Menu {
 	}
 
 	private static interface MenuEntry {
+
 		String getName();
 	}
 
@@ -271,6 +298,7 @@ public class Menu {
 		public MenuEntry[] getSubEntries() {
 			return subEntries;
 		}
+
 	}
 
 	private static class EditableMenuEntry implements MenuEntry {
@@ -321,21 +349,23 @@ public class Menu {
 			updateField.accept(contents);
 		}
 	}
-	
+
 	private static class UnselectableMenuEntry implements MenuEntry {
+
 		private final String title;
-		
+
 		public UnselectableMenuEntry(String title) {
 			this.title = title;
 		}
-		
+
 		@Override
 		public String getName() {
 			return this.title;
 		}
 	}
-	
+
 	private class TextDisplayMenuEntry extends TransitionMenuEntry {
+
 		private TextDisplayMenuEntry(String title, String... lines) {
 			super(title, Stream.of(lines).map(UnselectableMenuEntry::new)
 					.toArray(UnselectableMenuEntry[]::new));
