@@ -47,9 +47,13 @@ public class Menu {
 							Settings._serverPort + "",
 							s -> Settings._serverPort = Integer.parseInt(s),
 							codePoint -> '0' <= codePoint && codePoint <= '9')),
+			new TextDisplayMenuEntry("about",
+					"Crash v0.smol, by Postcursor Laboratories, January 2016",
+					"Postcursor Laboratories is a derivative of 1064CBread LLC",
+					"(and is also undeniably hella)"), // you don't need git blame for this
 			new ActionMenuEntry("quit", () -> System.exit(0)) };
 	private boolean _shouldClose = false;
-
+	
 	@SuppressWarnings("serial")
 	public Menu(Canvas canvas) {
 		_menuHistory = new Stack<MenuEntry[]>() {
@@ -67,15 +71,21 @@ public class Menu {
 					switch (e.getKeyCode()) {
 						case KeyEvent.VK_S:
 						case KeyEvent.VK_DOWN:
-							_selectionIndex = (_selectionIndex + 1)
-									% _menuHistory.peek().length;
+							do {
+								_selectionIndex = (_selectionIndex + 1)
+										% _menuHistory.peek().length;
+							} while (_menuHistory.peek()[_selectionIndex]
+									instanceof UnselectableMenuEntry);
 							break;
 
 						case KeyEvent.VK_W:
 						case KeyEvent.VK_UP:
-							_selectionIndex = (_selectionIndex - 1
-									+ _menuHistory.peek().length)
-									% _menuHistory.peek().length;
+							do {
+								_selectionIndex = (_selectionIndex - 1
+										+ _menuHistory.peek().length)
+										% _menuHistory.peek().length;
+							} while (_menuHistory.peek()[_selectionIndex]
+									instanceof UnselectableMenuEntry);
 							break;
 
 						case KeyEvent.VK_ENTER:
@@ -87,6 +97,10 @@ public class Menu {
 								_menuHistory.push(((TransitionMenuEntry) menu)
 										.getSubEntries());
 								_selectionIndex = 0;
+								while (_menuHistory.peek()[_selectionIndex]
+										instanceof UnselectableMenuEntry) {
+									_selectionIndex++;
+								}
 							} else if (menu instanceof EditableMenuEntry) {
 								_toRunWhenTextEntered =
 										((EditableMenuEntry) menu)::onEditingComplete;
@@ -173,7 +187,7 @@ public class Menu {
 			g.setFont(Resources.getFont(100));
 			g.drawString("CRASH", 100, 100);
 			g.setFont(Resources.getFont(50));
-
+			
 			MenuEntry[] entries = _menuHistory.peek();
 			for (int i = 0; i < entries.length; i++) {
 				g.drawString(
@@ -212,11 +226,8 @@ public class Menu {
 		_shouldClose = true;
 	}
 
-	// trolololololollll
 	private static interface MenuEntry {
-
 		String getName();
-
 	}
 
 	private static class ActionMenuEntry implements MenuEntry {
@@ -237,7 +248,6 @@ public class Menu {
 		public Runnable getAction() {
 			return action;
 		}
-
 	}
 
 	private class TransitionMenuEntry implements MenuEntry {
@@ -261,7 +271,6 @@ public class Menu {
 		public MenuEntry[] getSubEntries() {
 			return subEntries;
 		}
-
 	}
 
 	private static class EditableMenuEntry implements MenuEntry {
@@ -311,6 +320,25 @@ public class Menu {
 		public void onEditingComplete() {
 			updateField.accept(contents);
 		}
-
+	}
+	
+	private static class UnselectableMenuEntry implements MenuEntry {
+		private final String title;
+		
+		public UnselectableMenuEntry(String title) {
+			this.title = title;
+		}
+		
+		@Override
+		public String getName() {
+			return this.title;
+		}
+	}
+	
+	private class TextDisplayMenuEntry extends TransitionMenuEntry {
+		private TextDisplayMenuEntry(String title, String... lines) {
+			super(title, Stream.of(lines).map(UnselectableMenuEntry::new)
+					.toArray(UnselectableMenuEntry[]::new));
+		}
 	}
 }
