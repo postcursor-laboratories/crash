@@ -20,13 +20,11 @@ public class Resources {
 	static Image bg;
 	
 	static {
-		try {
-			InputStream is = CrashServer.class.getClassLoader().getResourceAsStream(
-					"AnonymousPro-1.002.001/Anonymous Pro.ttf");
+		try (InputStream is = CrashServer.class.getClassLoader().getResourceAsStream(
+				"AnonymousPro-1.002.001/Anonymous Pro.ttf")) {
 					//"ScoreFont.ttf");
 			font = Font.createFont(Font.TRUETYPE_FONT, is);
 			System.out.println(font);
-			is.close();
 		} catch (IOException | FontFormatException ex) {
 			ex.printStackTrace();
 			System.err.println("Font absent from res!");
