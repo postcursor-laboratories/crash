@@ -13,16 +13,16 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 public class CrashServer {
-	GameWorld world;
+	private GameWorld world;
 	private Leaderboard _leaderboard;
-	JFrame jf;
-	Canvas can;
+	private JFrame jf;
+	private Canvas can;
 	
-	ArrayList<Player> players = new ArrayList<>();
+	private ArrayList<Player> players = new ArrayList<>();
 
 	static final int W = Resources.W, H = Resources.H;
 	
-	boolean[] keys = new boolean[1 << 16];
+	private boolean[] keys = new boolean[1 << 16];
 
 	public CrashServer() {
 		jf = new JFrame();
@@ -30,9 +30,9 @@ public class CrashServer {
 		can.setSize(W, H);
 		jf.pack();
 		jf.setTitle("Server Viewer");
-		jf.setVisible(true);
+		//jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		jf.setExtendedState(Frame.MAXIMIZED_BOTH);
+		//jf.setExtendedState(Frame.MAXIMIZED_BOTH);
 
 		world = new GameWorld();
 		world.init();

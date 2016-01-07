@@ -14,7 +14,7 @@ public class Resources {
 	static int
 		W = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth(),
 		H = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight()  - 50;
-	static final Color MAROON = new Color(120, 0, 160);
+	static final Color MAROON = new Color(120, 0, 160); // display this when we can't load an image
 
 	static Font font;
 	static Image bg;

@@ -32,17 +32,16 @@ public class GameWorld {
 	static final int BEAM_HW = 400;
 	static final int BASE_H = 300;
 	
-	HashMap<Body,Integer> bodyIds;
-	HashMap<Integer,Body> bodies;
+	private HashMap<Body,Integer> bodyIds;
+	private HashMap<Integer,Body> bodies;
 	HashSet<Body> deadBodies;
-	int nextBodyId;
+	private int nextBodyId;
 	
-	ArrayList<Body> goneBodies;
-	ArrayList<Body> newBodies;
+	private ArrayList<Body> goneBodies;
+	private ArrayList<Body> newBodies;
 	ArrayList<Body> newDeadBodies;
 	
 	World _world;
-	
 	Player _currPlayer;
 
 	public GameWorld(){

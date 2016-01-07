@@ -12,12 +12,12 @@ import java.net.Socket;
 import javax.swing.JFrame;
 
 public class CrashClient {
-	GameWorld world;
-	JFrame jf;
-	Canvas _canvas;
+	private GameWorld world;
+	private JFrame jf;
+	private Canvas _canvas;
 
-	Socket serv;
-	Player player;
+	private Socket serv;
+	private Player player;
 
 	static int W = Resources.W, H = Resources.H;
 	
@@ -119,14 +119,14 @@ public class CrashClient {
 	}
 
 	public static void main(String[] args) {
-//		if(args.length > 0){
-//			new Thread("Server"){public void run(){
-//				new CrashServer();
-//			}}.start();
-//			try{
-//				Thread.sleep(100);
-//			}catch(Exception e){}
-//		}
+		if(args.length > 0){
+			new Thread("Server"){public void run(){
+				new CrashServer();
+			}}.start();
+			try{
+				Thread.sleep(100);
+			}catch(Exception e){}
+		}
 		new Thread("Client"){public void run(){
 			new CrashClient();
 		}}.start();
