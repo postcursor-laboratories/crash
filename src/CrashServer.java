@@ -1,12 +1,11 @@
 import java.awt.Canvas;
 import java.awt.Frame;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.image.BufferStrategy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -42,7 +41,9 @@ public class CrashServer {
 		new Thread("ServerAcceptThread") { public void run() {
 			ServerSocket ss;
 			try {
-				ss = new ServerSocket(42973);
+				ss = new ServerSocket();
+				ss.setReuseAddress(true);
+				ss.bind(new InetSocketAddress(Settings._serverPort));
 			} catch (IOException e2) {
 				e2.printStackTrace();
 				return;
