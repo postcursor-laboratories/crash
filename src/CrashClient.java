@@ -42,22 +42,21 @@ public class CrashClient {
 		_canvas.requestFocus();
 		_canvas.createBufferStrategy(2);
 		
-		// this will block until the user leaves the menu
-		new Menu(_canvas);
-		
-		try {
-			serv=new Socket(Settings._serverIP, Settings._serverPort);
-			player = new Player(
-					new DataOutputStream(serv.getOutputStream()),
-					new DataInputStream(serv.getInputStream()),
-					Settings._playerName
-							);
-			player.nameset = true;
-		} catch (IOException e2) {
-			e2.printStackTrace();
-			jf.dispose();
-			new CrashClient();
-			return;
+		while (true) {
+			// this will block until the user leaves the menu
+			new Menu(_canvas);
+
+			try {
+				serv = new Socket(Settings._serverIP, Settings._serverPort);
+				player = new Player(
+						new DataOutputStream(serv.getOutputStream()),
+						new DataInputStream(serv.getInputStream()),
+						Settings._playerName);
+				player.nameset = true;
+				break;
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
 		}
 		
 		_canvas.addKeyListener(new KeyListener() {
