@@ -22,7 +22,8 @@ public class Resources {
 	static {
 		try {
 			InputStream is = CrashServer.class.getClassLoader().getResourceAsStream(
-					"ScoreFont.ttf");
+					"AnonymousPro-1.002.001/Anonymous Pro.ttf");
+					//"ScoreFont.ttf");
 			font = Font.createFont(Font.TRUETYPE_FONT, is);
 			System.out.println(font);
 			is.close();
