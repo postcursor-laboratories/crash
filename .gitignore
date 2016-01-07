@@ -1,8 +1,5 @@
 bin/*.class
 
-# Protobuf generated java files
-/.protobuf-generated/
-
 # Executables
 *.exe
 *.out
