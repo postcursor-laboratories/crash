@@ -1,20 +1,16 @@
 import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public class CrashClient {
 	private GameWorld world;
@@ -29,47 +25,32 @@ public class CrashClient {
 	long lostTime;
 	
 	@SuppressWarnings("serial")
-	class ScaleCanvas extends JPanel {
-		private BufferedImage _buff;
-		
-		public ScaleCanvas() {
-			super();
-			_buff = new BufferedImage(Resources.W, Resources.H, BufferedImage.TYPE_INT_ARGB);
-		}
-		
+	class ScaleCanvas extends Canvas {
 		public Graphics2D getGraphics() {
-			Graphics2D g = (Graphics2D) _buff.createGraphics();
-//			g.setColor(Color.BLACK);
-//			g.fillRect(0, 0, Resources.W, Resources.H);
-			
-			double factorX = (double)getWidth()/Resources.W,
-					factorY = (double)getHeight()/Resources.H,
+			BufferStrategy buff = getBufferStrategy();
+			if (buff == null)
+				return null;
+			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			double factorX = (double)jf.getWidth()/Resources.W,
+					factorY = (double)jf.getHeight()/Resources.H,
 					factor = Math.min(factorX, factorY);
 			//System.out.println("W: "+jf.getWidth()+"/"+Resources.W+"="+factorX+" H: "+jf.getHeight()+"/"+Resources.H+"="+factorX+" f: "+factor);
 			
 			g.scale(factor, factor);
-
-//			Try to center viewing rectangle with black borders; TODO
-//			if (factorX > factorY) {
-//				g.translate(getWidth()*(1-factor)/2, 0);
-//			} else {
-//				g.translate(0, getHeight()*(1-factor)/2);
-//			}
-			
 			return g;
 		}
 		
 		public void show() {
-			Graphics2D g = (Graphics2D) super.getGraphics();
-			g.drawImage(_buff, 0, 0, null);
+			BufferStrategy buff = getBufferStrategy();
+			if (buff != null)
+				buff.show();
 		}
 	}
 
 	public CrashClient() {
 		jf = new JFrame();
 		jf.add(_canvas = new ScaleCanvas());
-//		_canvas.setSize(W, H);
-		_canvas.setPreferredSize(new Dimension(1000,600));
+		_canvas.setSize(W, H);
 		jf.pack();
 		jf.setTitle("Client Viewer");
 		jf.setVisible(true);
@@ -83,6 +64,7 @@ public class CrashClient {
 		
 		_canvas.setFocusable(true);
 		_canvas.requestFocus();
+		_canvas.createBufferStrategy(2);
 		
 		while (true) {
 			// this will block until the user leaves the menu
