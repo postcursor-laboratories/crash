@@ -1,4 +1,3 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -56,7 +55,7 @@ public class Menu {
 	private boolean _shouldClose = false;
 
 	@SuppressWarnings("serial")
-	public Menu(Canvas canvas) {
+	public Menu(CrashClient.ScaleCanvas canvas) {
 		_menuHistory = new Stack<MenuEntry[]>() {
 
 			{
@@ -189,9 +188,8 @@ public class Menu {
 			}
 		});
 
-		BufferStrategy buff = canvas.getBufferStrategy();
 		while (!_shouldClose) {
-			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			Graphics2D g = canvas.getGraphics();
 
 			g.addRenderingHints(
 					new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -223,7 +221,7 @@ public class Menu {
 						100, 200 + 50 * i);
 			}
 
-			buff.show();
+			canvas.show();
 			try {
 				Thread.sleep(30);
 			} catch (InterruptedException e) {

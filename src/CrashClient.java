@@ -3,6 +3,7 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,7 +15,7 @@ import javax.swing.JFrame;
 public class CrashClient {
 	private GameWorld world;
 	private JFrame jf;
-	private Canvas _canvas;
+	private ScaleCanvas _canvas;
 
 	private Socket serv;
 	private Player player;
@@ -22,10 +23,33 @@ public class CrashClient {
 	static int W = Resources.W, H = Resources.H;
 	
 	long lostTime;
+	
+	@SuppressWarnings("serial")
+	class ScaleCanvas extends Canvas {
+		public Graphics2D getGraphics() {
+			BufferStrategy buff = getBufferStrategy();
+			if (buff == null)
+				return null;
+			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			double factorX = (double)jf.getWidth()/Resources.W,
+					factorY = (double)jf.getHeight()/Resources.H,
+					factor = Math.min(factorX, factorY);
+			//System.out.println("W: "+jf.getWidth()+"/"+Resources.W+"="+factorX+" H: "+jf.getHeight()+"/"+Resources.H+"="+factorX+" f: "+factor);
+			
+			g.scale(factor, factor);
+			return g;
+		}
+		
+		public void show() {
+			BufferStrategy buff = getBufferStrategy();
+			if (buff != null)
+				buff.show();
+		}
+	}
 
 	public CrashClient() {
 		jf = new JFrame();
-		jf.add(_canvas = new Canvas());
+		jf.add(_canvas = new ScaleCanvas());
 		_canvas.setSize(W, H);
 		jf.pack();
 		jf.setTitle("Client Viewer");
@@ -101,15 +125,16 @@ public class CrashClient {
 		}.start();
 		
 		while(true){
-			BufferStrategy buff = _canvas.getBufferStrategy();
+			
 			while (true) {
 				world.tick();
 				player.act(world._world);
 				
-				Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+				Graphics2D g = _canvas.getGraphics();
 				world.draw(g, W, H);
-				buff.show();
 				
+				// done drawing
+				_canvas.show();
 				try {
 					Thread.sleep(30); //will hang on sock read
 				} catch (InterruptedException e) {
