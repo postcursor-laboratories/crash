@@ -55,6 +55,8 @@ public class CrashClient {
 			player.nameset = true;
 		} catch (IOException e2) {
 			e2.printStackTrace();
+			jf.dispose();
+			new CrashClient();
 			return;
 		}
 		
