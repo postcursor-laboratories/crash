@@ -5,8 +5,10 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 import java.util.stream.Stream;
 
 public class Menu {
@@ -34,16 +36,17 @@ public class Menu {
 		Settings.save();
 	});
 
-	private MenuEntry[] _entries =
-			{ new ActionMenuEntry("start game!", this::startGame),
-					new TransitionMenuEntry("settings", new EditableMenuEntry(
-							"player name", s -> Settings._playerName = s,
-							Settings._playerName),
-					new EditableMenuEntry("server IP",
-							s -> Settings._serverIP = s, Settings._serverIP),
+	private MenuEntry[] _entries = {
+			new ActionMenuEntry("start game!", this::startGame),
+			new TransitionMenuEntry("settings",
+					new EditableMenuEntry("player name", Settings._playerName,
+							s -> Settings._playerName = s),
+					new EditableMenuEntry("server IP", Settings._serverIP,
+							s -> Settings._serverIP = s),
 					new EditableMenuEntry("server port",
+							Settings._serverPort + "",
 							s -> Settings._serverPort = Integer.parseInt(s),
-							Settings._serverPort + "")),
+							codePoint -> '0' <= codePoint && codePoint <= '9')),
 			new ActionMenuEntry("quit", () -> System.exit(0)) };
 	private boolean _shouldClose = false;
 
@@ -94,8 +97,6 @@ public class Menu {
 				} else {
 					boolean reprocess = false;
 					switch (e.getKeyCode()) {
-						case KeyEvent.VK_W:
-						case KeyEvent.VK_S:
 						case KeyEvent.VK_UP:
 						case KeyEvent.VK_DOWN:
 							reprocess = true;
@@ -118,7 +119,8 @@ public class Menu {
 							(EditableMenuEntry) _menuHistory
 									.peek()[_selectionIndex];
 					String _textField = editable.getContents();
-					switch (e.getKeyChar()) {
+					char keyChar = e.getKeyChar();
+					switch (keyChar) {
 						case '\n':
 							// do nothing; leaving the entry field is handled in
 							// keyPressed
@@ -131,10 +133,15 @@ public class Menu {
 						default:
 							// because I know you folks and you are going to
 							// mess with this
-							if (_textField.length() < 64)
-								_textField += e.getKeyChar();
+							if (_textField.length() < 64
+									&& editable.isCodePointValid(keyChar))
+								_textField += keyChar;
 					}
-					editable.setContents(_textField);
+					try {
+						editable.setContents(_textField);
+					} catch (IllegalArgumentException badText) {
+						// ignore this
+					}
 				}
 			}
 
@@ -261,12 +268,19 @@ public class Menu {
 
 		private final String title;
 		private final Consumer<String> updateField;
+		private final IntPredicate charValidation;
 		private String contents;
 
-		private EditableMenuEntry(String title, Consumer<String> updateField,
-				String contents) {
+		private EditableMenuEntry(String title, String contents,
+				Consumer<String> updateField) {
+			this(title, contents, updateField, x -> true);
+		}
+
+		private EditableMenuEntry(String title, String contents,
+				Consumer<String> updateField, IntPredicate charValidation) {
 			this.title = title;
 			this.updateField = updateField;
+			this.charValidation = charValidation;
 			this.contents = contents;
 		}
 
@@ -275,11 +289,22 @@ public class Menu {
 			return String.format("%s: %s", title, contents);
 		}
 
+		public boolean isCodePointValid(int codePoint) {
+			return charValidation.test(codePoint);
+		}
+
 		public String getContents() {
 			return contents;
 		}
 
 		public void setContents(String contents) {
+			int[] invalid = contents.codePoints()
+					.filter(charValidation.negate()).toArray();
+			if (invalid.length > 0) {
+				throw new IllegalArgumentException(
+						"invalid characters in contents: "
+								+ Arrays.toString(invalid));
+			}
 			this.contents = contents;
 		}
 
