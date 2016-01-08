@@ -340,6 +340,7 @@ public class GameWorld {
 	}
 	
 	void draw(Graphics2D g, int W, int H){
+		Resources.transform(g);
 	    g.addRenderingHints( new RenderingHints(
 	             RenderingHints.KEY_TEXT_ANTIALIASING,
 	             RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
@@ -358,7 +359,6 @@ public class GameWorld {
 		g.setColor(Color.BLACK);
 		
 		AffineTransform trans;
-		Resources.transform(g);
 		g.translate(W/2, H/2);
 		g.scale(scale, -scale);
 		

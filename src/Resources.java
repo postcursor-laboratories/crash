@@ -18,7 +18,11 @@ public class Resources {
 		H = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight()  - 50;
 	private static double SCALE = 1;
 	private static final int GAME_W = 2440;
-	static final Pair<Integer, Integer> GAME_RATIO = new Pair<>(16, 9);
+	static final Pair<Integer, Integer> GAME_RATIO = new Pair<Integer, Integer>(16, 9) {
+		public String toString() {
+			return head + "/" + tail;
+		};
+	};
 
 	public static void setH(int h) {
 		H = h;
@@ -43,11 +47,12 @@ public class Resources {
 		int gameW = getGameWidth();
 		int gameH = getGameHeight();
 		System.err.printf(
-				"Scaling %sx%s to %sx%s using target %sx%s (scale = %s)%n", gameW,
-				gameH, SCALE * gameW, SCALE * gameH, W, H, SCALE);
+				"Scaling %sx%s (r=%s) to %sx%s (r=%s) using target %sx%s (r=%s) (scale = %s)%n",
+				gameW, gameH, GAME_RATIO.head / GAME_RATIO.tail.doubleValue(), SCALE * gameW,
+				SCALE * gameH, (SCALE * gameW) / (SCALE * gameH), W, H,
+				W / (double) H, SCALE);
 		TRANSFORM.setToIdentity();
-		TRANSFORM.scale(W / (double) getGameWidth(),
-				H / (double) getGameHeight());
+		TRANSFORM.scale(SCALE, SCALE);
 	}
 
 	private static double chooseVisibleScale() {
