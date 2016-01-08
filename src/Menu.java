@@ -55,14 +55,9 @@ public class Menu {
 			new ActionMenuEntry("quit", () -> System.exit(0)) };
 	private boolean _shouldClose = false;
 
-	@SuppressWarnings("serial")
 	public Menu(Canvas canvas) {
-		_menuHistory = new Stack<MenuEntry[]>() {
-
-			{
-				push(_entries);
-			}
-		};
+		_menuHistory = new Stack<MenuEntry[]>();
+		_menuHistory.push(_entries);
 
 		KeyListener listener;
 		canvas.addKeyListener(listener = new KeyListener() {
