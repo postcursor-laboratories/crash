@@ -51,8 +51,10 @@ public class Resources {
 				gameW, gameH, GAME_RATIO.head / GAME_RATIO.tail.doubleValue(), SCALE * gameW,
 				SCALE * gameH, (SCALE * gameW) / (SCALE * gameH), W, H,
 				W / (double) H, SCALE);
-		TRANSFORM.setToIdentity();
-		TRANSFORM.scale(SCALE, SCALE);
+		synchronized (TRANSFORM) {
+			TRANSFORM.setToIdentity();
+			TRANSFORM.scale(SCALE, SCALE);
+		}
 	}
 
 	private static double chooseVisibleScale() {
@@ -118,7 +120,9 @@ public class Resources {
 	}
 
 	public static void transform(Graphics2D g) {
-		g.setTransform(TRANSFORM);
+		synchronized (TRANSFORM) {
+			g.setTransform(TRANSFORM);
+		}
 	}
 	
 }

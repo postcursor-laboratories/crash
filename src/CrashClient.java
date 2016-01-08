@@ -22,6 +22,10 @@ public class CrashClient {
 	private Socket serv;
 	private Player player;
 
+	private final Object gLock = new Object();
+	private volatile BufferStrategy currentStrat;
+	private volatile Graphics2D currentGraphics;
+
 	static int W = Resources.getW(), H = Resources.getH();
 
 	long lostTime;
@@ -34,6 +38,11 @@ public class CrashClient {
 			Insets i = jf.getInsets();
 			Resources.setW(W = jf.getWidth() - i.left - i.right);
 			Resources.setH(H = jf.getHeight() - i.top - i.bottom);
+			synchronized (gLock) {
+				_canvas.createBufferStrategy(2);
+				currentStrat = _canvas.getBufferStrategy();
+				currentGraphics = (Graphics2D) currentStrat.getDrawGraphics();
+			}
 		};
 		jf.addComponentListener(new ComponentAdapter() {
 
@@ -52,7 +61,8 @@ public class CrashClient {
 
 		_canvas.setFocusable(true);
 		_canvas.requestFocus();
-		_canvas.createBufferStrategy(2);
+		// Ensure that _canvas is updated
+		onResize.run();
 
 		while (true) {
 			// this will block until the user leaves the menu
@@ -114,16 +124,15 @@ public class CrashClient {
 			}
 		}.start();
 
-		BufferStrategy buff = _canvas.getBufferStrategy();
-
-		Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 		int gameWidth = Resources.getGameWidth();
 		int gameHeight = Resources.getGameHeight();
 		while (true) {
 			world.tick();
 			player.act(world._world);
-			world.draw(g, gameWidth, gameHeight);
-			buff.show();
+			synchronized (gLock) {
+				world.draw(currentGraphics, gameWidth, gameHeight);
+				currentStrat.show();
+			}
 
 			try {
 				Thread.sleep(30); // will hang on sock read

@@ -363,14 +363,14 @@ public class GameWorld {
 		g.scale(scale, -scale);
 		
 		float mapW = 65;
-		float screenW = Resources.getW() / scale;
+		float screenW = W / scale;
 		if(screenW < mapW){
 			float leftover = (screenW - mapW);
 			g.translate(leftover*(_currPlayer.b.getPosition().x)/mapW, 0);
 		}
 		
 		float mapH = 34;
-		float screenH = Resources.getH() / scale;
+		float screenH = H / scale;
 		if(screenH < mapH){
 			float leftover = (screenH - mapH);
 			g.translate(0, leftover*(_currPlayer.b.getPosition().y)/mapH);
