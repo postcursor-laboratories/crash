@@ -188,6 +188,14 @@ public class Menu {
 
 		BufferStrategy buff = canvas.getBufferStrategy();
 		while (!_shouldClose) {
+			if (buff == null) {
+				System.err.println("Menu canvas buffer is null!");
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException e) {}
+				continue;
+			}
+			
 			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
 			
 			Resources.transform(g);
