@@ -20,7 +20,7 @@ public class CrashServer {
 	
 	private ArrayList<Player> players = new ArrayList<>();
 
-	static final int W = Resources.W, H = Resources.H;
+	static final int W = Resources.getW(), H = Resources.getH();
 	
 	private boolean[] keys = new boolean[1 << 16];
 

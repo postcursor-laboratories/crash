@@ -358,18 +358,19 @@ public class GameWorld {
 		g.setColor(Color.BLACK);
 		
 		AffineTransform trans;
-		g.translate(W/2, H/2);		
+		Resources.transform(g);
+		g.translate(W/2, H/2);
 		g.scale(scale, -scale);
 		
 		float mapW = 65;
-		float screenW = Resources.W / scale;
+		float screenW = Resources.getW() / scale;
 		if(screenW < mapW){
 			float leftover = (screenW - mapW);
 			g.translate(leftover*(_currPlayer.b.getPosition().x)/mapW, 0);
 		}
 		
 		float mapH = 34;
-		float screenH = Resources.H / scale;
+		float screenH = Resources.getH() / scale;
 		if(screenH < mapH){
 			float leftover = (screenH - mapH);
 			g.translate(0, leftover*(_currPlayer.b.getPosition().y)/mapH);

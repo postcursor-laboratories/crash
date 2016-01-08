@@ -2,7 +2,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,9 +13,65 @@ import javax.imageio.ImageIO;
 
 
 public class Resources {
-	static int
+	private static int
 		W = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth(),
 		H = (int)java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight()  - 50;
+	private static double SCALE = 1;
+	private static final int GAME_W = 2440;
+	static final Pair<Integer, Integer> GAME_RATIO = new Pair<>(16, 9);
+
+	public static void setH(int h) {
+		H = h;
+		remakeTransform();
+	}
+
+	public static void setW(int w) {
+		W = w;
+		remakeTransform();
+	}
+
+	public static int getH() {
+		return H;
+	}
+
+	public static int getW() {
+		return W;
+	}
+
+	private static void remakeTransform() {
+		SCALE = chooseVisibleScale();
+		int gameW = getGameWidth();
+		int gameH = getGameHeight();
+		System.err.printf(
+				"Scaling %sx%s to %sx%s using target %sx%s (scale = %s)%n", gameW,
+				gameH, SCALE * gameW, SCALE * gameH, W, H, SCALE);
+		TRANSFORM.setToIdentity();
+		TRANSFORM.scale(W / (double) getGameWidth(),
+				H / (double) getGameHeight());
+	}
+
+	private static double chooseVisibleScale() {
+		double scaleW = W / (double) getGameWidth();
+		if (scaleW * getGameHeight() > H) {
+			// not visible by height
+			double scaleH = H / (double) getGameHeight();
+			if (scaleH * getGameWidth() > W) {
+				// eh.
+				System.err.println(
+						"Woah there, no good ratio? Is your screen non-existent?");
+				return 1;
+			}
+			return scaleH;
+		}
+		return scaleW;
+	}
+
+	private static final AffineTransform TRANSFORM = new AffineTransform();
+
+	static {
+		remakeTransform();
+	}
+	
 	static final Color MAROON = new Color(120, 0, 160); // display this when we can't load an image
 
 	static Font font;
@@ -45,4 +103,17 @@ public class Resources {
 	public static Font getFont(float size) {
 		return font.deriveFont(size);
 	}
+	
+	public static int getGameWidth() {
+		return GAME_W;
+	}
+	
+	public static int getGameHeight() {
+		return GAME_W / GAME_RATIO.head * GAME_RATIO.tail;
+	}
+
+	public static void transform(Graphics2D g) {
+		g.setTransform(TRANSFORM);
+	}
+	
 }

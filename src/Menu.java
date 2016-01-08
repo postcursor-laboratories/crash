@@ -76,7 +76,8 @@ public class Menu {
 										% _menuHistory.peek().length;
 							} while (_menuHistory
 									.peek()[_selectionIndex] instanceof UnselectableMenuEntry && _selectionIndex != lastIndex);
-							if (_selectionIndex == lastIndex) {
+							if (_selectionIndex == lastIndex && _menuHistory
+									.peek()[_selectionIndex] instanceof UnselectableMenuEntry) {
 								_selectionIndex = -1;
 							}
 							break;
@@ -92,7 +93,8 @@ public class Menu {
 										% _menuHistory.peek().length;
 							} while (_menuHistory
 									.peek()[_selectionIndex] instanceof UnselectableMenuEntry && _selectionIndex != lastIndex);
-							if (_selectionIndex == lastIndex) {
+							if (_selectionIndex == lastIndex && _menuHistory
+									.peek()[_selectionIndex] instanceof UnselectableMenuEntry) {
 								_selectionIndex = -1;
 							}
 							break;
@@ -187,6 +189,8 @@ public class Menu {
 		BufferStrategy buff = canvas.getBufferStrategy();
 		while (!_shouldClose) {
 			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			
+			Resources.transform(g);
 
 			g.addRenderingHints(
 					new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -201,7 +205,7 @@ public class Menu {
 							RenderingHints.VALUE_INTERPOLATION_BICUBIC));
 
 			g.setColor(Color.WHITE);
-			g.fillRect(0, 0, Resources.W, Resources.H);
+			g.fillRect(0, 0, Resources.getGameWidth(), Resources. getGameHeight());
 			g.setColor(Color.BLACK);
 
 			// TODO make this actually pretty
