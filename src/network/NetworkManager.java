@@ -4,11 +4,14 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.compress.utils.BoundedInputStream;
 
 public class NetworkManager implements Closeable {
 
@@ -16,7 +19,14 @@ public class NetworkManager implements Closeable {
 	private static final int MAX_PACKETS_TO_PROCESS = Short.MAX_VALUE;
 	private static final int NO_PACKET = Short.MIN_VALUE;
 	private static final int NO_CONTENT_LENGTH = -1;
-	private static final byte[] EMPTY_BYTE_ARRAY = {};
+	private static final DataInputStream EMPTY_INPUT_STREAM =
+			EmptyDataInputStream.INSTANCE;
+
+	private static DataInputStream createLimitedDataStream(InputStream stream,
+			int size) {
+		return size == 0 ? EMPTY_INPUT_STREAM
+				: new DataInputStream(new BoundedInputStream(stream, size));
+	}
 
 	private final ConcurrentLinkedQueue<Packet> packetQueue =
 			new ConcurrentLinkedQueue<>();
@@ -50,27 +60,16 @@ public class NetworkManager implements Closeable {
 					throw new InvalidDataException(
 							"content length too large, > " + MAX_PACKET_SIZE);
 				}
-				// special optimization: 0len packet
-				if (len == 0) {
-					storeEmptyPacket();
-					continue;
-				}
 				contentLength = len;
 			} else {
 				// Have packet ID + content length, can read packet
-				byte[] packet = new byte[contentLength];
-				in.readFully(packet);
-				storePacket(packet);
+				storePacket(createLimitedDataStream(in, contentLength));
 			}
 		}
 	}
 
-	private void storeEmptyPacket() {
-		storePacket(EMPTY_BYTE_ARRAY);
-	}
-
-	private void storePacket(byte[] data) {
-		Packet p = PacketRegistry.getPacketFactory(packetId).createPacket(data);
+	private void storePacket(DataInputStream in) {
+		Packet p = PacketRegistry.getPacketFactory(packetId).createPacket(in);
 		packetQueue.add(p);
 		// Reset
 		packetId = NO_PACKET;
@@ -83,8 +82,11 @@ public class NetworkManager implements Closeable {
 				&& !packetQueue.isEmpty()) {
 			packets.add(packetQueue.poll());
 		}
-		System.err.println("Saving " + packetQueue.size()
-				+ " packets for next round of packet processing");
+		int qSize = packetQueue.size();
+		if (qSize > 0) {
+			System.err.println("Saving " + qSize
+					+ " packets for next round of packet processing");
+		}
 		return packets.stream();
 	}
 

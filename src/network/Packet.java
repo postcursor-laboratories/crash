@@ -1,14 +1,15 @@
 package network;
 
+import java.io.DataOutputStream;
 
 public interface Packet {
 
 	int getId();
 
 	/**
-	 * The created bytes do not include the packet ID. It is up to the network
+	 * The written bytes should not include the packet ID. It is up to the network
 	 * manager to send that.
 	 */
-	byte[] createBytes();
+	void writeBytes(DataOutputStream out);
 
 }

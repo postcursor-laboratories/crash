@@ -1,7 +1,5 @@
 package network;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,9 +30,7 @@ public final class ProtobufPacketFactory implements PacketFactory {
 		}
 
 		@Override
-		public byte[] createBytes() {
-			ByteArrayOutputStream collector = new ByteArrayOutputStream();
-			DataOutputStream stream = new DataOutputStream(collector);
+		public void writeBytes(DataOutputStream stream) {
 			try {
 				stream.writeInt(subId);
 				pbData.writeTo(stream);
@@ -42,7 +38,6 @@ public final class ProtobufPacketFactory implements PacketFactory {
 				// Literally impossible.
 				throw new IllegalStateException("wtf");
 			}
-			return collector.toByteArray();
 		}
 
 		@Override
@@ -116,9 +111,7 @@ public final class ProtobufPacketFactory implements PacketFactory {
 	}
 
 	@Override
-	public PBPacket<?> createPacket(byte[] data) {
-		ByteArrayInputStream provider = new ByteArrayInputStream(data);
-		DataInputStream in = new DataInputStream(provider);
+	public PBPacket<?> createPacket(DataInputStream in) {
 		PBPacket<?> p = null;
 		try {
 			int subId = in.readInt();

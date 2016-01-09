@@ -1,11 +1,11 @@
 package network;
 
-
+import java.io.DataInputStream;
 
 public interface PacketFactory {
 	
 	int getPacketId();
 	
-	Packet createPacket(byte[] data);
+	Packet createPacket(DataInputStream in);
 
 }
