@@ -7,8 +7,8 @@ public interface Packet {
 	int getId();
 
 	/**
-	 * The written bytes should not include the packet ID. It is up to the network
-	 * manager to send that.
+	 * The written bytes should not include the packet ID. It is up to the
+	 * network manager to send that.
 	 */
 	void writeBytes(DataOutputStream out);
 

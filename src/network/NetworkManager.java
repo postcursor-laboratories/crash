@@ -15,7 +15,8 @@ import org.apache.commons.compress.utils.BoundedInputStream;
 
 public class NetworkManager implements Closeable {
 
-	private static final int MAX_PACKET_SIZE = Integer.MAX_VALUE;
+	// ~14k
+	private static final int MAX_PACKET_SIZE = Short.MAX_VALUE / 4;
 	private static final int MAX_PACKETS_TO_PROCESS = Short.MAX_VALUE;
 	private static final int NO_PACKET = Short.MIN_VALUE;
 	private static final int NO_CONTENT_LENGTH = -1;
@@ -59,6 +60,11 @@ public class NetworkManager implements Closeable {
 				if (len > MAX_PACKET_SIZE) {
 					throw new InvalidDataException(
 							"content length too large, > " + MAX_PACKET_SIZE);
+				}
+				// Special 0-length case
+				if (len == 0) {
+					storePacket(EMPTY_INPUT_STREAM);
+					continue;
 				}
 				contentLength = len;
 			} else {
