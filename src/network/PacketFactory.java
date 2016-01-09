@@ -1,11 +1,12 @@
 package network;
 
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public interface PacketFactory {
 
-	int getPacketId();
+	short getPacketId();
 
-	Packet createPacket(DataInputStream in);
+	Packet createPacket(DataInputStream in) throws IOException;
 
 }

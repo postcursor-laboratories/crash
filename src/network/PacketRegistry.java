@@ -5,10 +5,10 @@ import java.util.Map;
 
 public final class PacketRegistry {
 
-	private static final Map<Integer, PacketFactory> idToPacket =
+	private static final Map<Short, PacketFactory> idToPacket =
 			new HashMap<>();
 
-	public static PacketFactory getPacketFactory(int id) {
+	public static PacketFactory getPacketFactory(short id) {
 		return idToPacket.get(id);
 	}
 
@@ -18,7 +18,7 @@ public final class PacketRegistry {
 
 	static {
 		// All packets are registered here.
-		int packetIdTracker = 0;
+		short packetIdTracker = 0;
 		registerPacketFactory(new ProtobufPacketFactory(packetIdTracker++));
 	}
 

@@ -30,18 +30,13 @@ public final class ProtobufPacketFactory implements PacketFactory {
 		}
 
 		@Override
-		public void writeBytes(DataOutputStream stream) {
-			try {
-				stream.writeInt(subId);
-				pbData.writeTo(stream);
-			} catch (IOException e) {
-				// Literally impossible.
-				throw new IllegalStateException("wtf");
-			}
+		public void writeBytes(DataOutputStream stream) throws IOException {
+			stream.writeInt(subId);
+			pbData.writeTo(stream);
 		}
 
 		@Override
-		public int getId() {
+		public short getId() {
 			return ProtobufPacketFactory.this.getPacketId();
 		}
 	}
@@ -65,7 +60,7 @@ public final class ProtobufPacketFactory implements PacketFactory {
 			new HashMap<>();
 	private final Map<Class<? extends MessageLite>, Integer> pbTypeToSubId =
 			new HashMap<>();
-	private final int id;
+	private final short id;
 	private transient int subIdTracker;
 
 	private <T extends MessageLite> void addParser(Class<T> type) {
@@ -92,13 +87,13 @@ public final class ProtobufPacketFactory implements PacketFactory {
 		addParser(KeyProto.Keys.class);
 	}
 
-	protected ProtobufPacketFactory(int id) {
+	protected ProtobufPacketFactory(short id) {
 		this.id = id;
 		setInstance(instance);
 	}
 
 	@Override
-	public int getPacketId() {
+	public short getPacketId() {
 		return id;
 	}
 
@@ -111,16 +106,11 @@ public final class ProtobufPacketFactory implements PacketFactory {
 	}
 
 	@Override
-	public PBPacket<?> createPacket(DataInputStream in) {
+	public PBPacket<?> createPacket(DataInputStream in) throws IOException {
 		PBPacket<?> p = null;
-		try {
-			int subId = in.readInt();
-			Parser<? extends MessageLite> parser = subIdToParser.get(subId);
-			p = new PBPacket<>(subId, parser.parseFrom(in));
-		} catch (IOException e) {
-			// Literally impossible.
-			throw new IllegalStateException("wtf");
-		}
+		int subId = in.readInt();
+		Parser<? extends MessageLite> parser = subIdToParser.get(subId);
+		p = new PBPacket<>(subId, parser.parseFrom(in));
 		return p;
 	}
 
