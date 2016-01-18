@@ -31,6 +31,7 @@ public class CrashClient {
 	long lostTime;
 
 	public CrashClient() {
+		System.out.println("Launching Crash client");
 		jf = new JFrame();
 		jf.add(_canvas = new Canvas());
 		_canvas.setSize(Resources.getGameWidth(), Resources.getGameHeight());

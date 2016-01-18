@@ -25,6 +25,7 @@ public class CrashServer {
 	private boolean[] keys = new boolean[1 << 16];
 
 	public CrashServer() {
+		System.out.println("Launching Crash server");
 		jf = new JFrame();
 		jf.add(can = new Canvas());
 		can.setSize(W, H);

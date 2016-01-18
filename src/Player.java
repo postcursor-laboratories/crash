@@ -58,13 +58,13 @@ public class Player {
 	}
 	
 	void act(World world){
-		if(keys[KeyEvent.VK_W]){
+		if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){
 			b.applyForce(new Vec2(0,30), b.getWorldCenter());
 		}
-		if(keys[KeyEvent.VK_A]){
+		if(keys[KeyEvent.VK_A] || keys[KeyEvent.VK_LEFT]){
 			b.applyForce(new Vec2(-20,0), b.getWorldCenter());
 		}
-		if(keys[KeyEvent.VK_D]){
+		if(keys[KeyEvent.VK_D] || keys[KeyEvent.VK_RIGHT]){
 			b.applyForce(new Vec2(20,0), b.getWorldCenter());
 		}
 	}
@@ -109,7 +109,7 @@ public class Player {
 	void recvInit() throws IOException{
 	    this.name = PlayerData.parseFrom(readData()).getName();
 		this.nameset = true;
-		System.out.println("Name Recieved: "+this.name);
+		System.out.println("Name Received: "+this.name);
 	}
 	
 	void recvKeys() throws IOException{
