@@ -194,9 +194,18 @@ public class Menu {
 					Thread.sleep(30);
 				} catch (InterruptedException e) {}
 				continue;
-			}
 			
-			Graphics2D g = (Graphics2D) buff.getDrawGraphics();
+			}
+			Graphics2D g = null;
+			try {
+				g = (Graphics2D) buff.getDrawGraphics();
+			} catch (IllegalStateException e) {
+				System.err.println("buff.getDrawGraphics() IllegalStateException: "+e.getMessage());
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException ie) {}
+				continue;
+			}
 			
 			Resources.transform(g);
 
@@ -230,7 +239,11 @@ public class Menu {
 						100, 200 + 50 * i);
 			}
 
-			buff.show();
+			try {
+				buff.show();
+			} catch (IllegalStateException e) {
+				System.err.println("buff.show() IllegalStateException: "+e.getMessage());
+			}
 			try {
 				Thread.sleep(30);
 			} catch (InterruptedException e) {

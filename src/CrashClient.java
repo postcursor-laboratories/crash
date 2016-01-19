@@ -1,8 +1,10 @@
 import java.awt.Canvas;
 import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
 import java.awt.Insets;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
@@ -26,19 +28,24 @@ public class CrashClient {
 	private volatile BufferStrategy currentStrat;
 	private volatile Graphics2D currentGraphics;
 
-	static int W = Resources.getW(), H = Resources.getH();
-
 	long lostTime;
 
 	public CrashClient() {
 		System.out.println("Launching Crash client");
+		Resources.setW(Settings._winW);
+		Resources.setH(Settings._winH);
+		
 		jf = new JFrame();
 		jf.add(_canvas = new Canvas());
 		_canvas.setSize(Resources.getGameWidth(), Resources.getGameHeight());
 		Runnable onResize = () -> {
 			Insets i = jf.getInsets();
-			Resources.setW(W = jf.getWidth() - i.left - i.right);
-			Resources.setH(H = jf.getHeight() - i.top - i.bottom);
+			Resources.setW(jf.getWidth() - i.left - i.right);
+			Resources.setH(jf.getHeight() - i.top - i.bottom);
+			
+			Settings._winW = Resources.getW();
+			Settings._winH = Resources.getH();
+			
 			synchronized (gLock) {
 				_canvas.createBufferStrategy(2);
 				currentStrat = _canvas.getBufferStrategy();
@@ -46,20 +53,31 @@ public class CrashClient {
 			}
 		};
 		jf.addComponentListener(new ComponentAdapter() {
-
+			// TODO: find a way to save window dimensions/position only when finished moving/resizing
+			
 			@Override
-			public void componentResized(ComponentEvent paramComponentEvent) {
-				onResize.run();
+			public void componentMoved(ComponentEvent arg0) {
+				Settings._winX = (int) jf.getLocationOnScreen().getX();
+				Settings._winY = (int) jf.getLocationOnScreen().getY();
+				Settings.save();
 			}
 
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+				onResize.run();
+				Settings.save();
+			}
 		});
 		jf.pack();
 		jf.setTitle("Client Viewer");
-		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// jf.setLocation(800, 300);
-		jf.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
+		
+		Insets i = jf.getInsets();
+		jf.setLocation(Settings._winX, Settings._winY);
+		jf.setSize(Settings._winW + i.left + i.right, Settings._winH + i.top + i.bottom);
+		
+		jf.setVisible(true);
+		
 		_canvas.setFocusable(true);
 		_canvas.requestFocus();
 		// Ensure that _canvas is updated

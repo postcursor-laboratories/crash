@@ -44,13 +44,13 @@ public class Resources {
 
 	private static void remakeTransform() {
 		SCALE = chooseVisibleScale();
-		int gameW = getGameWidth();
-		int gameH = getGameHeight();
-		System.err.printf(
-				"Scaling %sx%s (r=%s) to %sx%s (r=%s) using target %sx%s (r=%s) (scale = %s)%n",
-				gameW, gameH, GAME_RATIO.head / GAME_RATIO.tail.doubleValue(), SCALE * gameW,
-				SCALE * gameH, (SCALE * gameW) / (SCALE * gameH), W, H,
-				W / (double) H, SCALE);
+//		int gameW = getGameWidth();
+//		int gameH = getGameHeight();
+//		System.err.printf(
+//				"Scaling %sx%s (r=%s) to %sx%s (r=%s) using target %sx%s (r=%s) (scale = %s)%n",
+//				gameW, gameH, GAME_RATIO.head / GAME_RATIO.tail.doubleValue(), SCALE * gameW,
+//				SCALE * gameH, (SCALE * gameW) / (SCALE * gameH), W, H,
+//				W / (double) H, SCALE);
 		synchronized (TRANSFORM) {
 			TRANSFORM.setToIdentity();
 			TRANSFORM.scale(SCALE, SCALE);
@@ -64,8 +64,7 @@ public class Resources {
 			double scaleH = H / (double) getGameHeight();
 			if (scaleH * getGameWidth() > W) {
 				// eh.
-				System.err.println(
-						"Woah there, no good ratio? Is your screen non-existent?");
+				System.err.println("Woah there, no good ratio? Is your screen non-existent?");
 				return 1;
 			}
 			return scaleH;
