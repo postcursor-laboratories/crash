@@ -266,7 +266,7 @@ public class GameWorld {
 		_currPlayer.b = bodies.get(cli.readInt());
 	}
 	
-	void readWorld(DataInputStream cli) throws IOException{
+	void readWorld(DataInputStream cli) throws IOException {
 		int check = cli.readInt();
 		if(check!=1337)
 			throw new RuntimeException("Bad data feed: "+check);

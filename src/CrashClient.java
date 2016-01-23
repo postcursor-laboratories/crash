@@ -101,9 +101,7 @@ public class CrashClient {
 		}
 
 		_canvas.addKeyListener(new KeyListener() {
-
-			public void keyTyped(KeyEvent e) {
-			}
+			public void keyTyped(KeyEvent e) {}
 
 			public void keyPressed(KeyEvent e) {
 				player.keys[e.getKeyCode()] = true;
@@ -130,7 +128,6 @@ public class CrashClient {
 		}
 
 		new Thread("ClientUpdate") {
-
 			public void run() {
 				try {
 					while (true) {
